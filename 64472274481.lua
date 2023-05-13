@@ -3934,7 +3934,7 @@ runFunction(function()
     killaurarange = Killaura.CreateSlider({
         Name = "Attack range",
         Min = 1,
-        Max = 25,
+        Max = 18,
         Function = function(val) 
 			if killaurarangecirclepart then 
 				killaurarangecirclepart.Size = Vector3.new(val * 0.7, 0.01, val * 0.7)
@@ -4182,13 +4182,6 @@ runFunction(function()
         Function = function() end,
 		HoverText = "Times animation with hit attempt"
     })
-	if WhitelistFunctions:CheckPlayerType(lplr) ~= "DEFAULT" then
-		killauranovape = Killaura.CreateToggle({
-			Name = "No Vape",
-			Function = function() end,
-			HoverText = "no hit vape user"
-		})
-	end
 end)
 
 runFunction(function()
