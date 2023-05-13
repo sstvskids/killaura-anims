@@ -1,3 +1,4 @@
+--This watermark is used to delete the file if its cached, remove it to make the file persist after commits.
 local GuiLibrary = shared.GuiLibrary
 local playersService = game:GetService("Players")
 local textService = game:GetService("TextService")
@@ -449,11 +450,12 @@ local function getBestTool(block)
 	local blockmeta = bedwars.ItemTable[block]
 	local blockType = blockmeta.block and blockmeta.block.breakType
 	if blockType then
+		local best = 0
 		for i,v in pairs(bedwarsStore.localInventory.inventory.items) do
 			local meta = bedwars.ItemTable[v.itemType]
-			if meta.breakBlock and meta.breakBlock[blockType] then
+			if meta.breakBlock and meta.breakBlock[blockType] and meta.breakBlock[blockType] >= best then
+				best = meta.breakBlock[blockType]
 				tool = v
-				break
 			end
 		end
 	end
@@ -557,7 +559,7 @@ local function getBestBreakSide(pos)
 		if sidehardness <= softest then
 			softest = sidehardness
 			softestside = v
-		end
+		end	
 	end
 	return softestside, softest
 end
@@ -584,7 +586,7 @@ local function EntityNearPosition(distance, overridepos)
 					mag = (overridepos - v2.PrimaryPart.Position).magnitude
 				end
                 if mag <= closestMagnitude then
-					closestEntity, closestMagnitude = {Player = {Name = v.Name, UserId = (v.Name == "Duck" and 2020831224 or 1443379645)}, Character = v, RootPart = v.PrimaryPart}, mag
+					closestEntity, closestMagnitude = {Player = {Name = v.Name, UserId = (v.Name == "Duck" and 2020831224 or 1443379645)}, Character = v, RootPart = v.PrimaryPart, JumpTick = tick() + 5, Jumping = false, Humanoid = {HipHeight = 2}}, mag
                 end
 			end
 		end
@@ -595,7 +597,7 @@ local function EntityNearPosition(distance, overridepos)
 					mag = (overridepos - v2.PrimaryPart.Position).magnitude
 				end
                 if mag <= closestMagnitude then
-					closestEntity, closestMagnitude = {Player = {Name = "DiamondGuardian", UserId = 1443379645}, Character = v, RootPart = v.PrimaryPart}, mag
+					closestEntity, closestMagnitude = {Player = {Name = "DiamondGuardian", UserId = 1443379645}, Character = v, RootPart = v.PrimaryPart, JumpTick = tick() + 5, Jumping = false, Humanoid = {HipHeight = 2}}, mag
                 end
 			end
 		end
@@ -606,7 +608,7 @@ local function EntityNearPosition(distance, overridepos)
 					mag = (overridepos - v2.PrimaryPart.Position).magnitude
 				end
                 if mag <= closestMagnitude then
-					closestEntity, closestMagnitude = {Player = {Name = "GolemBoss", UserId = 1443379645}, Character = v, RootPart = v.PrimaryPart}, mag
+					closestEntity, closestMagnitude = {Player = {Name = "GolemBoss", UserId = 1443379645}, Character = v, RootPart = v.PrimaryPart, JumpTick = tick() + 5, Jumping = false, Humanoid = {HipHeight = 2}}, mag
                 end
 			end
 		end
@@ -619,7 +621,7 @@ local function EntityNearPosition(distance, overridepos)
 					mag = (overridepos - v.PrimaryPart.Position).magnitude
 				end
                 if mag <= closestMagnitude then -- magcheck
-                   	closestEntity, closestMagnitude = {Player = {Name = "Drone", UserId = 1443379645}, Character = v, RootPart = v.PrimaryPart}, mag
+                   	closestEntity, closestMagnitude = {Player = {Name = "Drone", UserId = 1443379645}, Character = v, RootPart = v.PrimaryPart, JumpTick = tick() + 5, Jumping = false, Humanoid = {HipHeight = 2}}, mag
                 end
 			end
 		end
@@ -908,7 +910,7 @@ local function CreateAutoHotbarGUI(children2, argstable)
 	ItemListcorner2.Parent = ItemListFrame2
 	local selectedslot = 1
 	local hoveredslot = 0
-
+	
 	local refreshslots
 	local refreshList
 	refreshslots = function()
@@ -1205,13 +1207,15 @@ runFunction(function()
 		BlockEngine = require(lplr.PlayerScripts.TS.lib["block-engine"]["client-block-engine"]).ClientBlockEngine,
 		BlockEngineClientEvents = require(replicatedStorageService["rbxts_include"]["node_modules"]["@easy-games"]["block-engine"].out.client["block-engine-client-events"]).BlockEngineClientEvents,
 		BlockPlacementController = KnitClient.Controllers.BlockPlacementController,
-		BowConstantsTable = debug.getupvalue(KnitClient.Controllers.ProjectileController.enableBeam, 5),
+		BowConstantsTable = debug.getupvalue(KnitClient.Controllers.ProjectileController.enableBeam, 6),
 		ProjectileController = KnitClient.Controllers.ProjectileController,
 		ChestController = KnitClient.Controllers.ChestController,
 		CannonHandController = KnitClient.Controllers.CannonHandController,
 		CannonAimRemote = dumpRemote(debug.getconstants(debug.getproto(KnitClient.Controllers.CannonController.startAiming, 5))),
+		CannonLaunchRemote = dumpRemote(debug.getconstants(KnitClient.Controllers.CannonHandController.launchSelf)),
 		ClickHold = require(replicatedStorageService["rbxts_include"]["node_modules"]["@easy-games"]["game-core"].out.client.ui.lib.util["click-hold"]).ClickHold,
 		ClientHandler = Client,
+		ClientConstructor = require(replicatedStorageService["rbxts_include"]["node_modules"]["@rbxts"].net.out.client),
 		ClientHandlerDamageBlock = require(replicatedStorageService["rbxts_include"]["node_modules"]["@easy-games"]["block-engine"].out.shared.remotes).BlockEngineRemotes.Client,
 		ClientStoreHandler = require(lplr.PlayerScripts.TS.ui.store).ClientStore,
 		CombatConstant = require(replicatedStorageService.TS.combat["combat-constant"]).CombatConstant,
@@ -1797,7 +1801,7 @@ runFunction(function()
 						v.SkyboxUp = "http://www.roblox.com/asset/?id=6864086702"
 					end
 				end
-
+			
 				for i,v in pairs(game:GetDescendants()) do
 					funnyfunc(v)
 				end
@@ -1848,7 +1852,7 @@ runFunction(function()
 						v.SkyboxUp = "http://www.roblox.com/asset/?id=7083449168"
 					end
 				end
-
+			
 				for i,v in pairs(game:GetDescendants()) do
 					funnyfunc(v)
 				end
@@ -2073,7 +2077,7 @@ runFunction(function()
 			end
 		end
 	end)
-
+	
 	local teleportedServers = false
 	table.insert(vapeConnections, lplr.OnTeleport:Connect(function(State)
 		if (not teleportedServers) then
@@ -2362,6 +2366,7 @@ GuiLibrary.RemoveObject("SafeWalkOptionsButton")
 GuiLibrary.RemoveObject("BlinkOptionsButton")
 GuiLibrary.RemoveObject("FOVChangerOptionsButton")
 GuiLibrary.RemoveObject("AntiVoidOptionsButton")
+GuiLibrary.RemoveObject("SongBeatsOptionsButton")
 
 runFunction(function()
 	local AimAssist = {Enabled = false}
@@ -2579,6 +2584,9 @@ runFunction(function()
 		Name = "Sprint",
 		Function = function(callback)
 			if callback then
+				if inputService.TouchEnabled then
+					pcall(function() lplr.PlayerGui.MobileUI["2"].Visible = false end)
+				end
 				oldSprintFunction = bedwars.SprintController.stopSprinting
 				bedwars.SprintController.stopSprinting = function(...)
 					local originalCall = oldSprintFunction(...)
@@ -2594,6 +2602,9 @@ runFunction(function()
 					bedwars.SprintController:startSprinting()
 				end)
 			else
+				if inputService.TouchEnabled then
+					pcall(function() lplr.PlayerGui.MobileUI["2"].Visible = true end)
+				end
 				bedwars.SprintController.stopSprinting = oldSprintFunction
 				bedwars.SprintController:stopSprinting()
 			end
@@ -2888,6 +2899,7 @@ runFunction(function()
 	})
 end)
 
+local autobankballoon = false
 runFunction(function()
 	local Fly = {Enabled = false}
 	local FlyMode = {Value = "Normal"}
@@ -2945,6 +2957,15 @@ runFunction(function()
 						FlyDown = false
 					end
 				end))
+				if inputService.TouchEnabled then
+					pcall(function()
+						local jumpButton = lplr.PlayerGui.TouchGui.TouchControlFrame.JumpButton
+						table.insert(Fly.Connections, jumpButton:GetPropertyChangedSignal("ImageRectOffset"):Connect(function()
+							FlyUp = jumpButton.ImageRectOffset.X == 146
+						end))
+						FlyUp = jumpButton.ImageRectOffset.X == 146
+					end)
+				end
 				table.insert(Fly.Connections, vapeEvents.BalloonPopped.Event:Connect(function(poppedTable)
 					if poppedTable.inflatedBalloon and poppedTable.inflatedBalloon:GetAttribute("BalloonOwner") == lplr.UserId then 
 						lastonground = not onground
@@ -2954,7 +2975,7 @@ runFunction(function()
 				end))
 				table.insert(Fly.Connections, vapeEvents.AutoBankBalloon.Event:Connect(function()
 					repeat task.wait() until getItem("balloon")
-					buyballoons()
+					inflateBalloon()
 				end))
 
 				local balloons
@@ -3311,6 +3332,15 @@ runFunction(function()
 						InfiniteFlyDown = false
 					end
 				end))
+				if inputService.TouchEnabled then
+					pcall(function()
+						local jumpButton = lplr.PlayerGui.TouchGui.TouchControlFrame.JumpButton
+						table.insert(InfiniteFly.Connections, jumpButton:GetPropertyChangedSignal("ImageRectOffset"):Connect(function()
+							InfiniteFlyUp = jumpButton.ImageRectOffset.X == 146
+						end))
+						InfiniteFlyUp = jumpButton.ImageRectOffset.X == 146
+					end)
+				end
 				clonesuccess = false
 				if entityLibrary.isAlive and entityLibrary.character.Humanoid.Health > 0 and isnetworkowner(entityLibrary.character.HumanoidRootPart) then
 					cloned = lplr.Character
@@ -3356,7 +3386,7 @@ runFunction(function()
 					if entityLibrary.isAlive then
 						if isnetworkowner(oldcloneroot) then 
 							local playerMass = (entityLibrary.character.HumanoidRootPart:GetMass() - 1.4) * (delta * 100)
-
+							
 							local flyVelocity = entityLibrary.character.Humanoid.MoveDirection * (InfiniteFlyMode.Value == "Normal" and InfiniteFlySpeed.Value or (20 * getSpeedMultiplier()))
 							entityLibrary.character.HumanoidRootPart.Velocity = flyVelocity + (Vector3.new(0, playerMass + (InfiniteFlyUp and InfiniteFlyVerticalSpeed.Value or 0) + (InfiniteFlyDown and -InfiniteFlyVerticalSpeed.Value or 0), 0))
 							if InfiniteFlyMode.Value ~= "Normal" then
@@ -3370,7 +3400,7 @@ runFunction(function()
 							local speedCFrame = {oldcloneroot.CFrame:GetComponents()}
 							speedCFrame[1] = clone.CFrame.X
 							if speedCFrame[2] < 1000 or (not goneup) then 
-								warningNotification("InfiniteFly", "Teleported Up", 3)
+								task.spawn(warningNotification, "InfiniteFly", "Teleported Up", 3)
 								speedCFrame[2] = 100000
 								goneup = true
 							end
@@ -3408,7 +3438,7 @@ runFunction(function()
 							FlyOverlap.FilterDescendantsInstances = {lplr.Character, gameCamera}
 							local allowed = true
 							for i,v in pairs(workspace:GetPartBoundsInRadius(newcf.p, 2, FlyOverlap)) do 
-								if (v.Position.Y + (v.Size.Y / 2)) > (newcf.p.Y + 0.1) then 
+								if (v.Position.Y + (v.Size.Y / 2)) > (newcf.p.Y + 0.5) then 
 									allowed = false
 									break
 								end
@@ -3554,12 +3584,12 @@ runFunction(function()
 			{CFrame = CFrame.new(0.69, -0.71, 0.6) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.05}
 		},
 		Slow = {
-			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(295), math.rad(55), math.rad(290)), Time = 0.15},
-			{CFrame = CFrame.new(0.69, -0.71, 0.6) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.15}
+			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(295), math.rad(55), math.rad(290)), Time = 0.3},
+			{CFrame = CFrame.new(0.69, -0.71, 0.6) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.3}
 		},
 		Fast = {
-			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(295), math.rad(55), math.rad(290)), Time = 0.01},
-			{CFrame = CFrame.new(0.69, -0.71, 0.6) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.01}
+			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(295), math.rad(55), math.rad(290)), Time = 0.001},
+			{CFrame = CFrame.new(0.69, -0.71, 0.6) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.001}
 		},
 		New = {
 			{CFrame = CFrame.new(0.69, -0.77, 1.47) * CFrame.Angles(math.rad(-33), math.rad(57), math.rad(-81)), Time = 0.12},
@@ -3583,13 +3613,17 @@ runFunction(function()
 			{CFrame = CFrame.new(0.63, -0.1, 1.37) * CFrame.Angles(math.rad(-84), math.rad(50), math.rad(-38)), Time = 0.15}
 		},
 		Custom = {
-			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(30), math.rad(50), math.rad(90)), Time = 0.1},
-			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(84), math.rad(50), math.rad(38)), Time = 0.2}
+			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-30), math.rad(50), math.rad(90)), Time = 0.1},
+			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(84), math.rad(30), math.rad(38)), Time = 0.2}
 		},
-		Experimental = {
-			{CFrame = CFrame.new(0.45, -0.7, 0.3) * CFrame.Angles(math.rad(56), math.rad(45), math.rad(78)), Time = 0.1},
-			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(90), math.rad(50), math.rad(38)), Time = 0.1}
+		SkidWare = {
+			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(313), math.rad(43), math.rad(78)), Time = 0.1},
+			{CFrame = CFrame.new(0.69, -0.71, 0.6) * CFrame.Angles(math.rad(56), math.rad(32), math.rad(-21)), Time = 0.2}
 		},
+		Sudicial = {
+			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(324), math.rad(78), math.rad(56)), Time = 0.1},
+			{CFrame = CFrame.new(0.69, -0.71, 0.6) * CFrame.Angles(math.rad(65), math.rad(56), math.rad(-45)), Time = 0.2}
+		}
 	}
 
 	local function closestpos(block, pos)
@@ -3917,7 +3951,7 @@ runFunction(function()
     })
     killauraanimmethod = Killaura.CreateDropdown({
         Name = "Animation", 
-	List = {"Normal", "Slow", "New", "Fast", "Vertical Spin", "Exhibition", "Exhibition Old", "Custom", "Expermential",},
+		List = {"Normal", "Slow", "New", "Fast", "Vertical Spin", "Exhibition", "Exhibition Old", "Custom", "SkidWare", "Sudicial"},
         Function = function(val) end
     })
 	local oldviewmodel
@@ -4209,6 +4243,7 @@ runFunction(function()
 	local LongJumpdelay = tick()
 	local LongJumpSlowdown = {Value = 1.5}
 	local LongJumpSpeed = {Value = 1.5}
+	local projectileRemote = bedwars.ClientHandler:Get(bedwars.ProjectileRemote)
 
 	local function calculatepos(vec)
 		local returned = vec
@@ -4237,7 +4272,7 @@ runFunction(function()
 				local origpos = pos
 				local offsetshootpos = (CFrame.new(pos, pos + Vector3.new(0, -60, 0)) * CFrame.new(Vector3.new(-bedwars.BowConstantsTable.RelX, -bedwars.BowConstantsTable.RelY, -bedwars.BowConstantsTable.RelZ))).p
 				bedwars.ProjectileController:createLocalProjectile(bedwars.ProjectileMeta["fireball"], "fireball", "fireball", offsetshootpos, "", Vector3.new(0, -60, 0), {drawDurationSeconds = 1})
-				bedwars.ClientHandler:Get(bedwars.ProjectileRemote):CallServerAsync(fireball["tool"], "fireball", "fireball", offsetshootpos, pos, Vector3.new(0, -60, 0), game:GetService("HttpService"):GenerateGUID(true), {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045)
+				projectileRemote:CallServerAsync(fireball["tool"], "fireball", "fireball", offsetshootpos, pos, Vector3.new(0, -60, 0), game:GetService("HttpService"):GenerateGUID(true), {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045)
 			end)
 		end,
 		tnt = function(tnt, pos2)
@@ -4252,6 +4287,7 @@ runFunction(function()
 				task.delay(0.1, function()
 					local block, pos2 = getPlacedBlock(pos)
 					if block and block.Name == "cannon" and (entityLibrary.character.HumanoidRootPart.CFrame.p - block.Position).Magnitude < 20 then 
+						switchToAndUseTool(block)
 						local vec = entityLibrary.character.HumanoidRootPart.CFrame.lookVector
 						local damage = bedwars.BlockController:calculateBlockDamage(lplr, {
 							blockPosition = pos2
@@ -4260,19 +4296,27 @@ runFunction(function()
 							["cannonBlockPos"] = pos2,
 							["lookVector"] = vec
 						})
+						local broken = 0.1
 						if damage < block:GetAttribute("Health") then 
 							task.spawn(function()
+								broken = 0.4
 								bedwars.breakBlock(block.Position, true, getBestBreakSide(block.Position), true, true)
 							end)
 						end
-						task.delay(0.4, function()
-							bedwars.CannonHandController:launchSelf(block)
-							task.delay(0.1, function()
-								damagetimer = LongJumpSpeed.Value * 5
-								damagetimertick = tick() + 2.5
-								directionvec = Vector3.new(vec.X, 0, vec.Z).Unit
-							end)
-							bedwars.breakBlock(block.Position, true, getBestBreakSide(block.Position), true, true)
+						task.delay(broken, function()
+							for i = 1, 3 do 
+								local call = bedwars.ClientHandler:Get(bedwars.CannonLaunchRemote):CallServer({cannonBlockPos = bedwars.BlockController:getBlockPosition(block.Position)})
+								if call then
+									bedwars.breakBlock(block.Position, true, getBestBreakSide(block.Position), true, true)
+									task.delay(0.1, function()
+										damagetimer = LongJumpSpeed.Value * 6
+										damagetimertick = tick() + 2.5
+										directionvec = Vector3.new(vec.X, 0, vec.Z).Unit
+									end)
+									break
+								end
+								task.wait(0.1)
+							end
 						end)
 					end
 				end)	
@@ -4604,7 +4648,7 @@ runFunction(function()
 							shootpos = pos
 							shootvelo = Vector3.zero
 						end
-
+						
 						local newlook = CFrame.new(offsetStartPos, shootpos) * CFrame.new(Vector3.new(-bedwars.BowConstantsTable.RelX, -bedwars.BowConstantsTable.RelY, 0))
 						shootpos = newlook.p + (newlook.lookVector * (offsetStartPos - shootpos).magnitude)
 						local calculated = LaunchDirection(offsetStartPos, shootpos, projectileSpeed, projectileGravity, false)
@@ -4648,6 +4692,7 @@ end)
 runFunction(function()
 	local ProjectileAura = {Enabled = false}
 	local ProjectileAuraRange = {Value = 40}
+	local projectileRemote = bedwars.ClientHandler:Get(bedwars.ProjectileRemote)
 	local lastTarget
 
 	local function shootProjectile(item, ammotypething)
@@ -4692,7 +4737,7 @@ runFunction(function()
 			if calculated then 
 				local guid = game:GetService("HttpService"):GenerateGUID()
 				bedwars.ProjectileController:createLocalProjectile(tab, ammotypething, ammo, offsetStartPos, guid, calculated, {drawDurationSeconds = 1})
-				bedwars.ClientHandler:Get(bedwars.ProjectileRemote):CallServerAsync(item.tool, ammotypething, ammo, offsetStartPos, startPos, calculated, guid, {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045)
+				projectileRemote:CallServerAsync(item.tool, ammotypething, ammo, offsetStartPos, startPos, calculated, guid, {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045)
 				task.wait(projsource.fireDelaySec)
 			end
 		end
@@ -4876,7 +4921,7 @@ runFunction(function()
 							else
 								scaffoldstopmotionval = false
 							end
-
+							
 							for i = 1, ScaffoldExpand.Value do
 								local speedCFrame = getScaffold((entityLibrary.character.HumanoidRootPart.Position + ((scaffoldstopmotionval and Vector3.zero or entityLibrary.character.Humanoid.MoveDirection) * (i * 3.5))) + Vector3.new(0, -((entityLibrary.character.HumanoidRootPart.Size.Y / 2) + entityLibrary.character.Humanoid.HipHeight + (inputService:IsKeyDown(Enum.KeyCode.LeftShift) and ScaffoldDownwards.Enabled and 4.5 or 1.5))), 0)
 								speedCFrame = Vector3.new(speedCFrame.X, speedCFrame.Y - (towering and 4 or 0), speedCFrame.Z)
@@ -6877,18 +6922,28 @@ runFunction(function()
 	local rotationy = {Value = 0}
 	local rotationz = {Value = 0}
 	local oldc1
+	local oldfunc
 	local nobob = GuiLibrary.ObjectsThatCanBeSaved.RenderWindow.Api.CreateOptionsButton({
 		Name = "NoBob",
 		Function = function(callback) 
 			local viewmodel = gameCamera:FindFirstChild("Viewmodel")
 			if viewmodel then
 				if callback then
+					oldfunc = bedwars.ViewmodelController.playAnimation
+					bedwars.ViewmodelController.playAnimation = function(self, animid, details)
+						if animid == bedwars.AnimationType.FP_WALK then
+							return
+						end
+						return oldfunc(self, animid, details)
+					end
+					bedwars.ViewmodelController:setHeldItem(lplr.Character and lplr.Character:FindFirstChild("HandInvItem") and lplr.Character.HandInvItem.Value and lplr.Character.HandInvItem.Value:Clone())
 					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", -(nobobdepth.Value / 10))
 					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", (nobobhorizontal.Value / 10))
 					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_VERTICAL_OFFSET", (nobobvertical.Value / 10))
 					oldc1 = viewmodel.RightHand.RightWrist.C1
 					viewmodel.RightHand.RightWrist.C1 = oldc1 * CFrame.Angles(math.rad(rotationx.Value), math.rad(rotationy.Value), math.rad(rotationz.Value))
 				else
+					bedwars.ViewmodelController.playAnimation = oldfunc
 					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", 0)
 					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", 0)
 					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_VERTICAL_OFFSET", 0)
@@ -7082,7 +7137,6 @@ runFunction(function()
 end)
 
 local autobankapple = false
-local autobankballoon = false
 runFunction(function()
 	local AutoBuy = {Enabled = false}
 	local AutoBuyArmor = {Enabled = false}
@@ -7906,7 +7960,7 @@ runFunction(function()
 		end
 		return realitem
 	end
-
+	
 	local function findItemInTable(tab, item)
 		for i, v in pairs(tab) do
 			if v and v.itemType then
@@ -8784,7 +8838,7 @@ runFunction(function()
 									bodyforce.Force = Vector3.new(0, projectilemodel.PrimaryPart.AssemblyMass * workspace.Gravity, 0)
 									bodyforce.Name = "AntiGravity"
 									bodyforce.Parent = projectilemodel.PrimaryPart
-
+	
 									if plr then
 										projectilemodel:SetPrimaryPartCFrame(CFrame.new(plr.RootPart.CFrame.p, plr.RootPart.CFrame.p + gameCamera.CFrame.lookVector))
 										task.wait(0.3)
@@ -9738,73 +9792,65 @@ runFunction(function()
 		Name = "ProjectileExploit",
 		Function = function(callback)
 			if callback then 
-				oldrealremote = debug.getupvalue(debug.getupvalue(bedwars.ProjectileController.launchProjectileWithValues, 2), 10)
-				debug.setupvalue(debug.getupvalue(bedwars.ProjectileController.launchProjectileWithValues, 2), 10, {
-					Client = {
-						WaitFor = function(self6, remote)
-							local res = bedwars.ClientHandler:Get(remote)
-							return {
-								andThen = function(self5, func) 
-									return func({
-										CallServerAsync = function(self, shooting, proj, proj2, launchpos1, launchpos2, launchvelo, tag, tab1, ...) 
-											local plr
-											if BowExploitTarget["Value"] == "Mouse" then 
-												plr = EntityNearMouse(10000)
-											else
-												plr = EntityNearPosition(BowExploitAutoShootFOV.Value)
-											end
-											if plr then	
-												local playertype, playerattackable = WhitelistFunctions:CheckPlayerType(plr.Player)
-												if not playerattackable then 
-													return res:CallServerAsync(shooting, proj, proj2, launchpos1, launchpos2, launchvelo, tag, tab1, ...)
-												end
-
-												tab1.drawDurationSeconds = 1
-												repeat
-													task.wait(0.03)
-													local offsetStartPos = plr.RootPart.CFrame.p - plr.RootPart.CFrame.lookVector
-													local pos = plr.RootPart.Position
-													local playergrav = workspace.Gravity
-													local balloons = plr.Character:GetAttribute("InflatedBalloons")
-													if balloons and balloons > 0 then 
-														playergrav = (workspace.Gravity * (1 - ((balloons >= 4 and 1.2 or balloons >= 3 and 1 or 0.975))))
-													end
-													if plr.Character.PrimaryPart:FindFirstChild("rbxassetid://8200754399") then 
-														playergrav = (workspace.Gravity * 0.3)
-													end
-													local newLaunchVelo = bedwars.ProjectileMeta[proj2].launchVelocity
-													local shootpos, shootvelo = predictGravity(pos, plr.RootPart.Velocity, (pos - offsetStartPos).Magnitude / newLaunchVelo, plr, playergrav)
-													if proj2 == "telepearl" then
-														shootpos = pos
-														shootvelo = Vector3.zero
-													end
-													local newlook = CFrame.new(offsetStartPos, shootpos) * CFrame.new(Vector3.new(-bedwars.BowConstantsTable.RelX, -bedwars.BowConstantsTable.RelY, -bedwars.BowConstantsTable.RelZ))
-													shootpos = newlook.p + (newlook.lookVector * (offsetStartPos - shootpos).magnitude)
-													local calculated = LaunchDirection(offsetStartPos, shootpos, newLaunchVelo, workspace.Gravity, false)
-													if calculated then 
-														launchvelo = calculated
-														launchpos1 = offsetStartPos
-														launchpos2 = offsetStartPos
-														tab1.drawDurationSeconds = 1
-													else
-														break
-													end
-													if bedwars.RuntimeLib.await(res:CallServerAsync(shooting, proj, proj2, launchpos1, launchpos2, launchvelo, tag, tab1, workspace:GetServerTimeNow() - 0.045)) then break end
-												until false
-											else
-												return res:CallServerAsync(shooting, proj, proj2, launchpos1, launchpos2, launchvelo, tag, tab1, ...)
-											end
-										end
-									})
+				oldrealremote = bedwars.ClientConstructor.Function.new
+				bedwars.ClientConstructor.Function.new = function(self, ind, ...)
+					local res = oldrealremote(self, ind, ...)
+					local oldRemote = res.instance
+					if res.instance.Name == bedwars.ProjectileRemote then 
+						res.instance = {InvokeServer = function(self, shooting, proj, proj2, launchpos1, launchpos2, launchvelo, tag, tab1, ...) 
+							local plr
+							if BowExploitTarget["Value"] == "Mouse" then 
+								plr = EntityNearMouse(10000)
+							else
+								plr = EntityNearPosition(BowExploitAutoShootFOV.Value)
+							end
+							if plr then	
+								local playertype, playerattackable = WhitelistFunctions:CheckPlayerType(plr.Player)
+								if not playerattackable then 
+									return oldRemote:InvokeServer(shooting, proj, proj2, launchpos1, launchpos2, launchvelo, tag, tab1, ...)
 								end
-							}
-						end
-					}
-				})
+		
+								tab1.drawDurationSeconds = 1
+								repeat
+									task.wait(0.03)
+									local offsetStartPos = plr.RootPart.CFrame.p - plr.RootPart.CFrame.lookVector
+									local pos = plr.RootPart.Position
+									local playergrav = workspace.Gravity
+									local balloons = plr.Character:GetAttribute("InflatedBalloons")
+									if balloons and balloons > 0 then 
+										playergrav = (workspace.Gravity * (1 - ((balloons >= 4 and 1.2 or balloons >= 3 and 1 or 0.975))))
+									end
+									if plr.Character.PrimaryPart:FindFirstChild("rbxassetid://8200754399") then 
+										playergrav = (workspace.Gravity * 0.3)
+									end
+									local newLaunchVelo = bedwars.ProjectileMeta[proj2].launchVelocity
+									local shootpos, shootvelo = predictGravity(pos, plr.RootPart.Velocity, (pos - offsetStartPos).Magnitude / newLaunchVelo, plr, playergrav)
+									if proj2 == "telepearl" then
+										shootpos = pos
+										shootvelo = Vector3.zero
+									end
+									local newlook = CFrame.new(offsetStartPos, shootpos) * CFrame.new(Vector3.new(-bedwars.BowConstantsTable.RelX, -bedwars.BowConstantsTable.RelY, -bedwars.BowConstantsTable.RelZ))
+									shootpos = newlook.p + (newlook.lookVector * (offsetStartPos - shootpos).magnitude)
+									local calculated = LaunchDirection(offsetStartPos, shootpos, newLaunchVelo, workspace.Gravity, false)
+									if calculated then 
+										launchvelo = calculated
+										launchpos1 = offsetStartPos
+										launchpos2 = offsetStartPos
+										tab1.drawDurationSeconds = 1
+									else
+										break
+									end
+									if oldRemote:InvokeServer(shooting, proj, proj2, launchpos1, launchpos2, launchvelo, tag, tab1, workspace:GetServerTimeNow() - 0.045) then break end
+								until false
+							else
+								return oldRemote:InvokeServer(shooting, proj, proj2, launchpos1, launchpos2, launchvelo, tag, tab1, ...)
+							end
+						end}
+					end
+					return res
+				end
 			else
-				debug.setupvalue(debug.getupvalue(bedwars.ProjectileController.launchProjectileWithValues, 2), 10, {
-					Client = bedwars.ClientHandler
-				})
+				bedwars.ClientConstructor.Function.new = oldrealremote
 				oldrealremote = nil
 			end
 		end
@@ -9820,6 +9866,78 @@ runFunction(function()
 		Min = 1,
 		Max = 1000,
 		Default = 1000
+	})
+end)
+
+runFunction(function()
+	local SongBeats = {Enabled = false}
+	local SongBeatsList = {ObjectList = {}}
+	local SongBeatsIntensity = {Value = 5}
+	local SongTween
+	local SongAudio
+
+	local function PlaySong(arg)
+		local args = arg:split(":")
+		local song = isfile(args[1]) and getcustomasset(args[1])
+		if not song then 
+			warningNotification("SongBeats", "missing music file "..args[1], 5)
+			SongBeats.ToggleButton(false)
+			return
+		end
+		local bpm = 1 / (args[2] / 60)
+		SongAudio = Instance.new("Sound")
+		SongAudio.SoundId = song
+		SongAudio.Parent = workspace
+		SongAudio:Play()
+		repeat
+			repeat task.wait() until SongAudio.IsLoaded or (not SongBeats.Enabled) 
+			if (not SongBeats.Enabled) then break end
+			local newfov = math.min(bedwars.FovController:getFOV() * (bedwars.SprintController.sprinting and 1.1 or 1), 120)
+			gameCamera.FieldOfView = newfov - SongBeatsIntensity.Value
+			if SongTween then SongTween:Cancel() end
+			SongTween = game:GetService("TweenService"):Create(gameCamera, TweenInfo.new(0.2), {FieldOfView = newfov})
+			SongTween:Play()
+			task.wait(bpm)
+		until (not SongBeats.Enabled) or SongAudio.IsPaused
+	end
+
+	SongBeats = GuiLibrary.ObjectsThatCanBeSaved.RenderWindow.Api.CreateOptionsButton({
+		Name = "SongBeats",
+		Function = function(callback)
+			if callback then 
+				task.spawn(function()
+					if #SongBeatsList.ObjectList <= 0 then 
+						warningNotification("SongBeats", "no songs", 5)
+						SongBeats.ToggleButton(false)
+						return
+					end
+					local lastChosen
+					repeat
+						local newSong
+						repeat newSong = SongBeatsList.ObjectList[Random.new():NextInteger(1, #SongBeatsList.ObjectList)] task.wait() until newSong ~= lastChosen or #SongBeatsList.ObjectList <= 1
+						lastChosen = newSong
+						PlaySong(newSong)
+						if not SongBeats.Enabled then break end
+						task.wait(2)
+					until (not SongBeats.Enabled)
+				end)
+			else
+				if SongAudio then SongAudio:Destroy() end
+				if SongTween then SongTween:Cancel() end
+				gameCamera.FieldOfView = bedwars.FovController:getFOV() * (bedwars.SprintController.sprinting and 1.1 or 1)
+			end
+		end
+	})
+	SongBeatsList = SongBeats.CreateTextList({
+		Name = "SongList",
+		TempText = "songpath:bpm"
+	})
+	SongBeatsIntensity = SongBeats.CreateSlider({
+		Name = "Intensity",
+		Function = function() end,
+		Min = 1,
+		Max = 10,
+		Default = 5
 	})
 end)
 
@@ -9882,7 +10000,7 @@ runFunction(function()
 	local matchstatechanged = 0
 	local mapname = "Unknown"
 	local overlayenabled = false
-
+	
 	task.spawn(function()
 		pcall(function()
 			mapname = workspace:WaitForChild("Map"):WaitForChild("Worlds"):GetChildren()[1].Name
@@ -9931,7 +10049,7 @@ runFunction(function()
 						end
 					end
 				end))
-
+		
 				table.insert(overlayconnections, replicatedStorageService["events-@easy-games/game-core:shared/game-core-networking@getEvents.Events"].abilityUsed.OnClientEvent:Connect(function(char, ability)
 					if ability == "recall" or ability == "hatter_teleport" or ability == "spirit_assassin_teleport" or ability == "hannah_execute" then 
 						local plr = playersService:GetPlayerFromCharacter(char)
@@ -9965,7 +10083,7 @@ runFunction(function()
 						end
 					end
 				end))
-
+				
 				task.spawn(function()
 					repeat
 						local ping = math.floor(tonumber(game:GetService("Stats"):FindFirstChild("PerformanceStats").Ping:GetValue()))
@@ -10140,6 +10258,7 @@ task.spawn(function()
 	end
 	task.spawn(function()
 		pcall(function()
+			if inputService.TouchEnabled then return end
 			if not isfile("vape/Profiles/bedwarsdata.txt") then 
 				local commit = "main"
 				for i,v in pairs(game:HttpGet("https://github.com/7GrandDadPGN/VapeV4ForRoblox"):split("\n")) do 
@@ -10162,7 +10281,7 @@ task.spawn(function()
 						break
 					end
 				end
-
+				
 				local newdata = game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/"..commit.."/CustomModules/bedwarsdata", true)
 				if newdata ~= olddata then 
 					rundata(game:GetService("HttpService"):JSONDecode(newdata), game:GetService("HttpService"):JSONDecode(olddata))
