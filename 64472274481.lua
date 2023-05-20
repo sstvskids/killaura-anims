@@ -5828,11 +5828,11 @@ runFunction(function()
 					debug.setupvalue(bedwars.SwordController.swingSwordAtMouse, 4, bedwars.QueryUtil)
 				end
 				if AntiCrash.Enabled then
-				    if not game:IsLoaded() then
-				    	game.Loaded:wait()
-				    end
+					if not game:IsLoaded() then
+						game.Loaded:wait()
+					end
 				end
-					
+				
 				task.spawn(function()
 					repeat task.wait() until bedwarsStore.matchState ~= 0
 					if bedwars.ClientStoreHandler:getState().Game.customMatch == nil and GameFixer.Enabled then 
@@ -5867,19 +5867,18 @@ runFunction(function()
 		Default = true
 	})
 	AntiCrash = GameFixer.CreateToggle({
-	    Name = "AntiCrash",
-	    Function = function(callback)
-		if GameFixer.Enabled then
-		    if callback then 
-			if not game:IsLoaded() then
-			   game.Loaded:wait()
-			   end
+		Name = "AntiCrash",
+		Function = function(callback)
+			if GameFixer.Enabled then
+				if callback then 
+					if not game:IsLoaded() then
+						game.Loaded:wait()
+					end
+				end
 			end
-		    end
-		end
-	    end,
-	    HoverText = "Fixes crashing and makes it so you can't crash",
-	    Default = true
+		end,
+		HoverText = "Fixes crashing and makes it so you can't crash",
+		Default = true
 	})
 end)
 
