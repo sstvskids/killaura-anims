@@ -5867,19 +5867,19 @@ runFunction(function()
 		Default = true
 	})
 	AntiCrash = GameFixer.CreateToggle({
-		Name = "AntiCrash",
-		Function = function(callback)
-			if GameFixer.Enabled then
-				if callback then 
-					if not game:IsLoaded() then
-					   game.Loaded:wait()
-					   end
-				       end
-				end
+	    Name = "AntiCrash",
+	    Function = function(callback)
+		if GameFixer.Enabled then
+		    if callback then 
+			if not game:IsLoaded() then
+			   game.Loaded:wait()
+			   end
 			end
-		end,
-		HoverText = "Fixes crashing and makes it so you can't crash",
-		Default = true
+		    end
+		end
+	    end,
+	    HoverText = "Fixes crashing and makes it so you can't crash",
+	    Default = true
 	})
 end)
 
