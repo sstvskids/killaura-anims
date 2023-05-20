@@ -1,4 +1,3 @@
---This watermark is used to delete the file if its cached, remove it to make the file persist after commits.
 local GuiLibrary = shared.GuiLibrary
 local playersService = game:GetService("Players")
 local textService = game:GetService("TextService")
@@ -24,11 +23,14 @@ local vapeInjected = true
 
 local bedwars = {}
 local bedwarsStore = {
+	attackReach = 0,
+	attackReachUpdate = tick(),
 	blocks = {},
 	blockPlacer = {},
 	blockPlace = tick(),
 	blockRaycast = RaycastParams.new(),
 	equippedKit = "none",
+	grapple = tick(),
 	inventories = {},
 	localInventory = {
 		inventory = {
@@ -68,7 +70,8 @@ local isfile = isfile or function(file)
 end
 local networkownerswitch = tick()
 local isnetworkowner = isnetworkowner or function(part)
-	if gethiddenproperty(part, "NetworkOwnershipRule") == Enum.NetworkOwnership.Manual then 
+	local suc, res = pcall(function() return gethiddenproperty(part, "NetworkOwnershipRule") end)
+	if suc and res == Enum.NetworkOwnership.Manual then 
 		sethiddenproperty(part, "NetworkOwnershipRule", Enum.NetworkOwnership.Automatic)
 		networkownerswitch = tick() + 8
 	end
@@ -384,6 +387,9 @@ local function getSpeedMultiplier(reduce)
 		if SpeedDamageBoost and SpeedDamageBoost > 1 then 
 			speed = speed + (SpeedDamageBoost - 1)
 		end
+		if bedwarsStore.grapple > tick() then
+			speed = 5
+		end
 		if lplr.Character:GetAttribute("GrimReaperChannel") then 
 			speed = speed + 0.6
 		end
@@ -564,7 +570,7 @@ local function getBestBreakSide(pos)
 	return softestside, softest
 end
 
-local function EntityNearPosition(distance, overridepos)
+local function EntityNearPosition(distance, ignore, overridepos)
 	local closestEntity, closestMagnitude = nil, distance
 	if entityLibrary.isAlive then
 		for i, v in pairs(entityLibrary.entityList) do
@@ -579,50 +585,52 @@ local function EntityNearPosition(distance, overridepos)
                 end
             end
         end
-		for i, v in pairs(collectionService:GetTagged("Monster")) do
-			if v.PrimaryPart and v:GetAttribute("Team") ~= lplr:GetAttribute("Team") then
-				local mag = (entityLibrary.character.HumanoidRootPart.Position - v.PrimaryPart.Position).magnitude
-				if overridepos and mag > distance then 
-					mag = (overridepos - v2.PrimaryPart.Position).magnitude
+		if not ignore then
+			for i, v in pairs(collectionService:GetTagged("Monster")) do
+				if v.PrimaryPart and v:GetAttribute("Team") ~= lplr:GetAttribute("Team") then
+					local mag = (entityLibrary.character.HumanoidRootPart.Position - v.PrimaryPart.Position).magnitude
+					if overridepos and mag > distance then 
+						mag = (overridepos - v2.PrimaryPart.Position).magnitude
+					end
+					if mag <= closestMagnitude then
+						closestEntity, closestMagnitude = {Player = {Name = v.Name, UserId = (v.Name == "Duck" and 2020831224 or 1443379645)}, Character = v, RootPart = v.PrimaryPart, JumpTick = tick() + 5, Jumping = false, Humanoid = {HipHeight = 2}}, mag
+					end
 				end
-                if mag <= closestMagnitude then
-					closestEntity, closestMagnitude = {Player = {Name = v.Name, UserId = (v.Name == "Duck" and 2020831224 or 1443379645)}, Character = v, RootPart = v.PrimaryPart, JumpTick = tick() + 5, Jumping = false, Humanoid = {HipHeight = 2}}, mag
-                end
 			end
-		end
-		for i, v in pairs(collectionService:GetTagged("DiamondGuardian")) do
-			if v.PrimaryPart then
-				local mag = (entityLibrary.character.HumanoidRootPart.Position - v.PrimaryPart.Position).magnitude
-				if overridepos and mag > distance then 
-					mag = (overridepos - v2.PrimaryPart.Position).magnitude
+			for i, v in pairs(collectionService:GetTagged("DiamondGuardian")) do
+				if v.PrimaryPart then
+					local mag = (entityLibrary.character.HumanoidRootPart.Position - v.PrimaryPart.Position).magnitude
+					if overridepos and mag > distance then 
+						mag = (overridepos - v2.PrimaryPart.Position).magnitude
+					end
+					if mag <= closestMagnitude then
+						closestEntity, closestMagnitude = {Player = {Name = "DiamondGuardian", UserId = 1443379645}, Character = v, RootPart = v.PrimaryPart, JumpTick = tick() + 5, Jumping = false, Humanoid = {HipHeight = 2}}, mag
+					end
 				end
-                if mag <= closestMagnitude then
-					closestEntity, closestMagnitude = {Player = {Name = "DiamondGuardian", UserId = 1443379645}, Character = v, RootPart = v.PrimaryPart, JumpTick = tick() + 5, Jumping = false, Humanoid = {HipHeight = 2}}, mag
-                end
 			end
-		end
-		for i, v in pairs(collectionService:GetTagged("GolemBoss")) do
-			if v.PrimaryPart then
-				local mag = (entityLibrary.character.HumanoidRootPart.Position - v.PrimaryPart.Position).magnitude
-				if overridepos and mag > distance then 
-					mag = (overridepos - v2.PrimaryPart.Position).magnitude
+			for i, v in pairs(collectionService:GetTagged("GolemBoss")) do
+				if v.PrimaryPart then
+					local mag = (entityLibrary.character.HumanoidRootPart.Position - v.PrimaryPart.Position).magnitude
+					if overridepos and mag > distance then 
+						mag = (overridepos - v2.PrimaryPart.Position).magnitude
+					end
+					if mag <= closestMagnitude then
+						closestEntity, closestMagnitude = {Player = {Name = "GolemBoss", UserId = 1443379645}, Character = v, RootPart = v.PrimaryPart, JumpTick = tick() + 5, Jumping = false, Humanoid = {HipHeight = 2}}, mag
+					end
 				end
-                if mag <= closestMagnitude then
-					closestEntity, closestMagnitude = {Player = {Name = "GolemBoss", UserId = 1443379645}, Character = v, RootPart = v.PrimaryPart, JumpTick = tick() + 5, Jumping = false, Humanoid = {HipHeight = 2}}, mag
-                end
 			end
-		end
-		for i, v in pairs(collectionService:GetTagged("Drone")) do
-			if v.PrimaryPart and tonumber(v:GetAttribute("PlayerUserId")) ~= lplr.UserId then
-				local droneplr = playersService:GetPlayerByUserId(v:GetAttribute("PlayerUserId"))
-				if droneplr and droneplr.Team == lplr.Team then continue end
-				local mag = (entityLibrary.character.HumanoidRootPart.Position - v.PrimaryPart.Position).magnitude
-				if overridepos and mag > distance then 
-					mag = (overridepos - v.PrimaryPart.Position).magnitude
+			for i, v in pairs(collectionService:GetTagged("Drone")) do
+				if v.PrimaryPart and tonumber(v:GetAttribute("PlayerUserId")) ~= lplr.UserId then
+					local droneplr = playersService:GetPlayerByUserId(v:GetAttribute("PlayerUserId"))
+					if droneplr and droneplr.Team == lplr.Team then continue end
+					local mag = (entityLibrary.character.HumanoidRootPart.Position - v.PrimaryPart.Position).magnitude
+					if overridepos and mag > distance then 
+						mag = (overridepos - v.PrimaryPart.Position).magnitude
+					end
+					if mag <= closestMagnitude then -- magcheck
+						closestEntity, closestMagnitude = {Player = {Name = "Drone", UserId = 1443379645}, Character = v, RootPart = v.PrimaryPart, JumpTick = tick() + 5, Jumping = false, Humanoid = {HipHeight = 2}}, mag
+					end
 				end
-                if mag <= closestMagnitude then -- magcheck
-                   	closestEntity, closestMagnitude = {Player = {Name = "Drone", UserId = 1443379645}, Character = v, RootPart = v.PrimaryPart, JumpTick = tick() + 5, Jumping = false, Humanoid = {HipHeight = 2}}, mag
-                end
 			end
 		end
 	end
@@ -713,7 +721,9 @@ local function AllNearPosition(distance, amount, sortfunction, prediction)
                 end
 			end
 		end
-		table.sort(sortedentities, sortfunction)
+		if sortfunction then
+			table.sort(sortedentities, sortfunction)
+		end
 		for i,v in pairs(sortedentities) do 
 			table.insert(returnedplayer, v)
 			currentamount = currentamount + 1
@@ -1182,6 +1192,8 @@ runFunction(function()
 							end
 							attackTable.validate.selfPosition = attackValue(attackTable.validate.selfPosition.value + (attackMagnitude > 14.4 and (CFrame.lookAt(attackTable.validate.selfPosition.value, attackTable.validate.targetPosition.value).lookVector * 4) or Vector3.zero))
 						end
+						bedwarsStore.attackReach = math.floor((attackTable.validate.selfPosition.value - attackTable.validate.targetPosition.value).magnitude * 100) / 100
+						bedwarsStore.attackReachUpdate = tick() + 1
 					end
 					return originalRemote:SendToServer(attackTable, ...)
 				end
@@ -1270,7 +1282,7 @@ runFunction(function()
 		MageKitUtil = require(replicatedStorageService.TS.games.bedwars.kit.kits.mage["mage-kit-util"]).MageKitUtil,
 		MageController = KnitClient.Controllers.MageController,
 		MissileController = KnitClient.Controllers.GuidedProjectileController,
-		PickupMetalRemote = dumpRemote(debug.getconstants(debug.getproto(KnitClient.Controllers.MetalDetectorController.KnitStart, 1))),
+		PickupMetalRemote = dumpRemote(debug.getconstants(debug.getproto(debug.getproto(KnitClient.Controllers.MetalDetectorController.KnitStart, 1), 2))),
 		PickupRemote = dumpRemote(debug.getconstants(KnitClient.Controllers.ItemDropController.checkForPickup)),
 		ProjectileMeta = require(replicatedStorageService.TS.projectile["projectile-meta"]).ProjectileMeta,
 		ProjectileRemote = dumpRemote(debug.getconstants(debug.getupvalue(KnitClient.Controllers.ProjectileController.launchProjectileWithValues, 2))),
@@ -2367,6 +2379,7 @@ GuiLibrary.RemoveObject("BlinkOptionsButton")
 GuiLibrary.RemoveObject("FOVChangerOptionsButton")
 GuiLibrary.RemoveObject("AntiVoidOptionsButton")
 GuiLibrary.RemoveObject("SongBeatsOptionsButton")
+GuiLibrary.RemoveObject("TargetStrafeOptionsButton")
 
 runFunction(function()
 	local AimAssist = {Enabled = false}
@@ -2548,104 +2561,6 @@ runFunction(function()
 			end
 		end,
 		HoverText = "Remove the CPS cap"
-	})
-end)
-
-runFunction(function()
-	local autoclicker = {Enabled = false}
-	local noclickdelay = {Enabled = false}
-	local autoclickercps = {GetRandomValue = function() return 1 end}
-	local autoclickerblocks = {Enabled = false}
-	local autoclickermousedown = false
-
-	local function isNotHoveringOverGui()
-		local mousepos = inputService:GetMouseLocation() - Vector2.new(0, 36)
-		for i,v in pairs(lplr.PlayerGui:GetGuiObjectsAtPosition(mousepos.X, mousepos.Y)) do 
-			if v.Active then
-				return false
-			end
-		end
-		for i,v in pairs(game:GetService("CoreGui"):GetGuiObjectsAtPosition(mousepos.X, mousepos.Y)) do 
-			if v.Parent:IsA("ScreenGui") and v.Parent.Enabled then
-				if v.Active then
-					return false
-				end
-			end
-		end
-		return true
-	end
-
-	autoclicker = GuiLibrary.ObjectsThatCanBeSaved.CombatWindow.Api.CreateOptionsButton({
-		Name = "Fast AutoClicker",
-		Function = function(callback)
-			if callback then
-				table.insert(autoclicker.Connections, inputService.InputBegan:Connect(function(input, gameProcessed)
-					if gameProcessed and input.UserInputType == Enum.UserInputType.MouseButton1 then
-						autoclickermousedown = true
-						local firstClick = tick() + 0.1
-						task.spawn(function()
-							repeat
-								task.wait()
-								if entityLibrary.isAlive then
-									if not autoclicker.Enabled or not autoclickermousedown then break end
-									if not isNotHoveringOverGui() then continue end
-									if #bedwars.AppController:getOpenApps() > (bedwarsStore.equippedKit == "hannah" and 4 or 3) then continue end
-									if GuiLibrary.ObjectsThatCanBeSaved["Lobby CheckToggle"].Api.Enabled then
-										if bedwarsStore.matchState == 0 then continue end
-									end
-									if bedwarsStore.localHand.Type == "sword" then
-										if bedwars.KatanaController.chargingMaid == nil then
-											task.spawn(function()
-												if firstClick <= tick() then
-													bedwars.SwordController:swingSwordAtMouse()
-												else
-													firstClick = tick()
-												end
-											end)
-											task.wait(math.max((1 / autoclickercps.GetRandomValue()), noclickdelay.Enabled and 0 or (autoclickertimed.Enabled and 0.38 or 0)))
-										end
-									elseif bedwarsStore.localHand.Type == "block" then 
-										if autoclickerblocks.Enabled and bedwars.BlockPlacementController.blockPlacer and firstClick <= tick() then
-											if (workspace:GetServerTimeNow() - bedwars.BlockCpsController.lastPlaceTimestamp) > ((1 / 12) * 0.5) then
-												local mouseinfo = bedwars.BlockPlacementController.blockPlacer.clientManager:getBlockSelector():getMouseInfo(0)
-												if mouseinfo then
-													task.spawn(function()
-														if mouseinfo.placementPosition == mouseinfo.placementPosition then
-															bedwars.BlockPlacementController.blockPlacer:placeBlock(mouseinfo.placementPosition)
-														end
-													end)
-												end
-												task.wait((1 / autoclickercps.GetRandomValue()))
-											end
-										end
-									end
-								end
-							until not autoclicker.Enabled or not autoclickermousedown
-						end)
-					end
-				end))
-				table.insert(autoclicker.Connections, inputService.InputEnded:Connect(function(input)
-					if input.UserInputType == Enum.UserInputType.MouseButton1 then
-						autoclickermousedown = false
-					end
-				end))
-			end
-		end,
-		HoverText = "Hold attack button to automatically click"
-	})
-	autoclickercps = autoclicker.CreateTwoSlider({
-		Name = "CPS",
-		Min = 20,
-		Max = 500,
-		Function = function(val) end,
-		Default = 200,
-		Default2 = 100
-	})
-	autoclickerblocks = autoclicker.CreateToggle({
-		Name = "Place Blocks", 
-		Function = function() end, 
-		Default = true,
-		HoverText = "Automatically places blocks when left click is held."
 	})
 end)
 
@@ -4349,6 +4264,27 @@ runFunction(function()
 				projectileRemote:CallServerAsync(fireball["tool"], "fireball", "fireball", offsetshootpos, pos, Vector3.new(0, -60, 0), game:GetService("HttpService"):GenerateGUID(true), {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045)
 			end)
 		end,
+		grappling_hook = function(fireball, pos)
+			if not LongJump.Enabled then return end
+			pos = pos - (entityLibrary.character.HumanoidRootPart.CFrame.lookVector * 0.2)
+			if not (getPlacedBlock(pos - Vector3.new(0, 3, 0)) or getPlacedBlock(pos - Vector3.new(0, 6, 0))) then
+				local sound = Instance.new("Sound")
+				sound.SoundId = "rbxassetid://4809574295"
+				sound.Parent = workspace
+				sound.Ended:Connect(function()
+					sound:Destroy()
+				end)
+				sound:Play()
+			end
+			local origpos = pos
+			local offsetshootpos = (CFrame.new(pos, pos + Vector3.new(0, -60, 0)) * CFrame.new(Vector3.new(-bedwars.BowConstantsTable.RelX, -bedwars.BowConstantsTable.RelY, -bedwars.BowConstantsTable.RelZ))).p
+			projectileRemote:CallServerAsync(fireball["tool"], nil, "grappling_hook_projectile", offsetshootpos, pos, Vector3.new(0, -60, 0), game:GetService("HttpService"):GenerateGUID(true), {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045)
+			task.delay(0.3, function()
+				damagetimer = LongJumpSpeed.Value * 3.5
+				damagetimertick = tick() + 2.5
+				directionvec = Vector3.new(vec.X, 0, vec.Z).Unit
+			end)
+		end,
 		tnt = function(tnt, pos2)
 			if not LongJump.Enabled then return end
 			local pos = Vector3.new(pos2.X, getScaffold(Vector3.new(0, pos2.Y - (((entityLibrary.character.HumanoidRootPart.Size.Y / 2) + entityLibrary.character.Humanoid.HipHeight) - 1.5), 0)).Y, pos2.Z)
@@ -4599,6 +4535,53 @@ runFunction(function()
 				LongJumpOrigin = nil
 				damagetimer = 0
 				damagetimertick = 0
+			end
+		end, 
+		HoverText = "Lets you jump farther (Not landing on same level & Spamming can lead to lagbacks)"
+	})
+	LongJumpSlowdown = LongJump.CreateSlider({
+		Name = "Slowdown",
+		Min = 1,
+		Max = 1,
+		Double = 10,
+		Function = function() end,
+		Default = 1,
+	})
+	LongJumpSpeed = LongJump.CreateSlider({
+		Name = "Speed",
+		Min = 1,
+		Max = 60,
+		Function = function() end,
+		Default = 60
+	})
+end)
+
+runFunction(function()
+	local projectileRemote = bedwars.ClientHandler:Get(bedwars.ProjectileRemote)
+	local GrappleDisabler = {Enabled = false}
+	GrappleDisabler = GuiLibrary.ObjectsThatCanBeSaved.UtilityWindow.Api.CreateOptionsButton({
+		Name = "GrappleDisabler",
+		Function = function(callback)
+			if callback then
+				table.insert(GrappleDisabler.Connections, bedwars.ClientHandler:Get("GrapplingHookFunctions"):Connect(function(p4)
+					if p4.hookFunction == "PLAYER_IN_TRANSIT" then
+						bedwarsStore.grapple = tick() + 1.5
+					end
+				end))
+				task.spawn(function()
+					repeat
+						task.wait()
+						local grapple = getItem("grappling_hook")
+						if grapple then 
+							local res
+							local newpos = bedwarsStore.blocks[1].Position
+							repeat
+								task.wait(.05)
+								res = projectileRemote:CallServerAsync(grapple.tool, nil, "grappling_hook_projectile", newpos, newpos, Vector3.new(0, -60, 0), game:GetService("HttpService"):GenerateGUID(true), {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045)
+							until res or (not GrappleDisabler.Enabled)
+						end
+					until (not GrappleDisabler.Enabled)
+				end)
 			end
 		end, 
 		HoverText = "Lets you jump farther (Not landing on same level & Spamming can lead to lagbacks)"
@@ -6522,7 +6505,7 @@ runFunction(function()
 		image.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 		image.Size = UDim2.new(0, 32, 0, 32)
 		image.AnchorPoint = Vector2.new(0.5, 0.5)
-		image.Parent = espfold
+		image.Parent = billboard
 		local uicorner = Instance.new("UICorner")
 		uicorner.CornerRadius = UDim.new(0, 4)
 		uicorner.Parent = image
@@ -9870,13 +9853,13 @@ runFunction(function()
 				bedwars.ClientConstructor.Function.new = function(self, ind, ...)
 					local res = oldrealremote(self, ind, ...)
 					local oldRemote = res.instance
-					if res.instance.Name == bedwars.ProjectileRemote then 
+					if oldRemote and oldRemote.Name == bedwars.ProjectileRemote then 
 						res.instance = {InvokeServer = function(self, shooting, proj, proj2, launchpos1, launchpos2, launchvelo, tag, tab1, ...) 
 							local plr
 							if BowExploitTarget["Value"] == "Mouse" then 
 								plr = EntityNearMouse(10000)
 							else
-								plr = EntityNearPosition(BowExploitAutoShootFOV.Value)
+								plr = EntityNearPosition(BowExploitAutoShootFOV.Value, true)
 							end
 							if plr then	
 								local playertype, playerattackable = WhitelistFunctions:CheckPlayerType(plr.Player)
@@ -10012,6 +9995,73 @@ runFunction(function()
 		Min = 1,
 		Max = 10,
 		Default = 5
+	})
+end)
+
+runFunction(function()
+	local TargetStrafe = {Enabled = false}
+	local TargetStrafeRange = {Value = 18}
+	local oldmove
+	local controlmodule
+	local block
+	TargetStrafe = GuiLibrary.ObjectsThatCanBeSaved.BlatantWindow.Api.CreateOptionsButton({
+		Name = "TargetStrafe",
+		Function = function(callback)
+			if callback then 
+				task.spawn(function()
+					if not controlmodule then
+						local suc = pcall(function() controlmodule = require(lplr.PlayerScripts.PlayerModule).controls end)
+						if not suc then controlmodule = {} end
+					end
+					oldmove = controlmodule.moveFunction
+					local ang = 0
+					local oldplr
+					block = Instance.new("Part")
+					block.Anchored = true
+					block.CanCollide = false
+					block.Parent = gameCamera
+					controlmodule.moveFunction = function(Self, vec, facecam, ...)
+						if entityLibrary.isAlive then
+							local plr = AllNearPosition(TargetStrafeRange.Value + 5, 10)[1]
+							plr = plr and (not workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, (plr.RootPart.Position - entityLibrary.character.HumanoidRootPart.Position), bedwarsStore.blockRaycast)) and workspace:Raycast(plr.RootPart.Position, Vector3.new(0, -70, 0), bedwarsStore.blockRaycast) and plr or nil
+							if plr ~= oldplr then
+								if plr then
+									local x, y, z = CFrame.new(plr.RootPart.Position, entityLibrary.character.HumanoidRootPart.Position):ToEulerAnglesXYZ()
+									ang = math.deg(z)
+								end
+								oldplr = plr
+							end
+							if plr then 
+								facecam = false
+								local localPos = CFrame.new(plr.RootPart.Position)
+								local ray = workspace:Blockcast(localPos, Vector3.new(3, 3, 3), CFrame.Angles(0, math.rad(ang), 0).lookVector * TargetStrafeRange.Value, bedwarsStore.blockRaycast)
+								local newPos = localPos + (CFrame.Angles(0, math.rad(ang), 0).lookVector * (ray and ray.Distance - 1 or TargetStrafeRange.Value))
+								local factor = getSpeedMultiplier() > 1.7 and 6 or 4
+								if not workspace:Raycast(newPos.p, Vector3.new(0, -70, 0), bedwarsStore.blockRaycast) then 
+									newPos = localPos
+									factor = 40
+								end
+								if ((entityLibrary.character.HumanoidRootPart.Position * Vector3.new(1, 0, 1)) - (newPos.p * Vector3.new(1, 0, 1))).Magnitude < 4 or ray then
+									ang = ang + factor % 360
+								end
+								block.Position = newPos.p
+								vec = (newPos.p - entityLibrary.character.HumanoidRootPart.Position) * Vector3.new(1, 0, 1)
+							end
+						end
+						return oldmove(Self, vec, facecam, ...)
+					end
+				end)
+			else
+				block:Destroy()
+				controlmodule.moveFunction = oldmove
+			end
+		end
+	})
+	TargetStrafeRange = TargetStrafe.CreateSlider({
+		Name = "Range",
+		Min = 0,
+		Max = 18,
+		Function = function() end
 	})
 end)
 
@@ -10232,6 +10282,36 @@ runFunction(function()
 		end, 
 		Priority = 2
 	})
+end)
+
+runFunction(function()
+	local ReachDisplay = {}
+	local ReachLabel
+	ReachDisplay = GuiLibrary.CreateLegitModule({
+		Name = "Reach Display",
+		Function = function(callback)
+			if callback then 
+				task.spawn(function()
+					repeat
+						task.wait(0.4)
+						ReachLabel.Text = bedwarsStore.attackReachUpdate > tick() and bedwarsStore.attackReach.." studs" or "0.00 studs"
+					until (not ReachDisplay.Enabled)
+				end)
+			end
+		end
+	})
+	ReachLabel = Instance.new("TextLabel")
+	ReachLabel.Size = UDim2.new(0, 100, 0, 41)
+	ReachLabel.BackgroundTransparency = 0.5
+	ReachLabel.TextSize = 15
+	ReachLabel.Font = Enum.Font.Gotham
+	ReachLabel.Text = "0.00 studs"
+	ReachLabel.TextColor3 = Color3.new(1, 1, 1)
+	ReachLabel.BackgroundColor3 = Color3.new()
+	ReachLabel.Parent = ReachDisplay.GetCustomChildren()
+	local ReachCorner = Instance.new("UICorner")
+	ReachCorner.CornerRadius = UDim.new(0, 4)
+	ReachCorner.Parent = ReachLabel
 end)
 
 task.spawn(function()
