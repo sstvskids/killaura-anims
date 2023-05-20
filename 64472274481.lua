@@ -3716,7 +3716,7 @@ runFunction(function()
 		},
 		SkidWare = {
 			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-76), math.rad(98), math.rad(-90)), Time = 0.1},
-			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-43), math.rad(98), math.rad(-38)), Time = 0.2}
+			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-76), math.rad(98), math.rad(-38)), Time = 0.2}
 		},
 		Sudicial = {
 			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(324), math.rad(78), math.rad(56)), Time = 0.1},
