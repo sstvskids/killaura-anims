@@ -29,6 +29,7 @@ local bedwarsStore = {
 	blockPlace = tick(),
 	blockRaycast = RaycastParams.new(),
 	equippedKit = "none",
+	grapple = tick(),
 	inventories = {},
 	localInventory = {
 		inventory = {
@@ -383,6 +384,9 @@ local function getSpeedMultiplier(reduce)
 		local SpeedDamageBoost = lplr.Character:GetAttribute("SpeedBoost")
 		if SpeedDamageBoost and SpeedDamageBoost > 1 then 
 			speed = speed + (SpeedDamageBoost - 1)
+		end
+		if BedwarsStore.grapple > tick() then
+			speed = 5
 		end
 		if lplr.Character:GetAttribute("GrimReaperChannel") then 
 			speed = speed + 0.6
