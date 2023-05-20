@@ -3715,8 +3715,8 @@ runFunction(function()
 			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(84), math.rad(30), math.rad(38)), Time = 0.2}
 		},
 		SkidWare = {
-			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-73), math.rad(58), math.rad(-90)), Time = 0.1},
-			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-84), math.rad(58), math.rad(-38)), Time = 0.2}
+			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-80), math.rad(76), math.rad(-90)), Time = 0.1},
+			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-84), math.rad(76), math.rad(-38)), Time = 0.2}
 		},
 		Sudicial = {
 			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(324), math.rad(78), math.rad(56)), Time = 0.1},
@@ -5818,7 +5818,6 @@ end)
 runFunction(function()
 	local GameFixer = {Enabled = false}
 	local GameFixerHit = {Enabled = false}
-	local AntiCrash = {Enabled = false}
 	GameFixer = GuiLibrary.ObjectsThatCanBeSaved.RenderWindow.Api.CreateOptionsButton({
 		Name = "GameFixer",
 		Function = function(callback)
