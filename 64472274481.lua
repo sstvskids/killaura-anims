@@ -4645,6 +4645,53 @@ runFunction(function()
 	})
 end)
 
+runFunction(function()
+	local projectileRemote = bedwars.ClientHandler:Get(bedwars.ProjectileRemote)
+	local GrappleDisabler = {Enabled = false}
+	GrappleDisabler = GuiLibrary.ObjectsThatCanBeSaved.UtilityWindow.Api.CreateOptionsButton({
+		Name = "GrappleDisabler",
+		Function = function(callback)
+			if callback then
+				table.insert(GrappleDisabler.Connections, bedwars.ClientHandler:Get("GrapplingHookFunctions"):Connect(function(p4)
+					if p4.hookFunction == "PLAYER_IN_TRANSIT" then
+						bedwarsStore.grapple = tick() + 1.5
+					end
+				end))
+				task.spawn(function()
+					repeat
+						task.wait()
+						local grapple = getItem("grappling_hook")
+						if grapple then 
+							local res
+							local newpos = bedwarsStore.blocks[1].Position
+							repeat
+								task.wait(.05)
+								res = projectileRemote:CallServerAsync(grapple.tool, nil, "grappling_hook_projectile", newpos, newpos, Vector3.new(0, -60, 0), game:GetService("HttpService"):GenerateGUID(true), {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045)
+							until res or (not GrappleDisabler.Enabled)
+						end
+					until (not GrappleDisabler.Enabled)
+				end)
+			end
+		end, 
+		HoverText = "Lets you jump farther (Not landing on same level & Spamming can lead to lagbacks)"
+	})
+	LongJumpSlowdown = LongJump.CreateSlider({
+		Name = "Slowdown",
+		Min = 1,
+		Max = 1,
+		Double = 10,
+		Function = function() end,
+		Default = 1,
+	})
+	LongJumpSpeed = LongJump.CreateSlider({
+		Name = "Speed",
+		Min = 1,
+		Max = 60,
+		Function = function() end,
+		Default = 60
+	})
+end)
+
 local spiderActive = false
 local holdingshift = false
 runFunction(function()
