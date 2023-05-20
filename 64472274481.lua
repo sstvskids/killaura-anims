@@ -5827,12 +5827,6 @@ runFunction(function()
 					debug.setconstant(bedwars.SwordController.swingSwordAtMouse, 27, "raycast")
 					debug.setupvalue(bedwars.SwordController.swingSwordAtMouse, 4, bedwars.QueryUtil)
 				end
-				if AntiCrash.Enabled then
-					if not game:IsLoaded() then
-						game.Loaded:wait()
-					end
-				end
-				
 				task.spawn(function()
 					repeat task.wait() until bedwarsStore.matchState ~= 0
 					if bedwars.ClientStoreHandler:getState().Game.customMatch == nil and GameFixer.Enabled then 
@@ -5864,20 +5858,6 @@ runFunction(function()
 			end
 		end,
 		HoverText = "Fixes the raycast function used for extra reach",
-		Default = true
-	})
-	AntiCrash = GameFixer.CreateToggle({
-		Name = "AntiCrash",
-		Function = function(callback)
-			if GameFixer.Enabled then
-				if callback then 
-					if not game:IsLoaded() then
-						game.Loaded:wait()
-					end
-				end
-			end
-		end,
-		HoverText = "Fixes crashing and makes it so you can't crash",
 		Default = true
 	})
 end)
