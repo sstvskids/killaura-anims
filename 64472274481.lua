@@ -2556,7 +2556,6 @@ runFunction(function()
 	local noclickdelay = {Enabled = false}
 	local autoclickercps = {GetRandomValue = function() return 1 end}
 	local autoclickerblocks = {Enabled = false}
-	local autoclickertimed = {Enabled = false}
 	local autoclickermousedown = false
 
 	local function isNotHoveringOverGui()
@@ -2641,10 +2640,6 @@ runFunction(function()
 		Function = function(val) end,
 		Default = 200,
 		Default2 = 100
-	})
-	autoclickertimed = autoclicker.CreateToggle({
-		Name = "Timed",
-		Function = function() end
 	})
 	autoclickerblocks = autoclicker.CreateToggle({
 		Name = "Place Blocks", 
