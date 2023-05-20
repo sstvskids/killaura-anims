@@ -4053,7 +4053,7 @@ runFunction(function()
     })
     killauraanimmethod = Killaura.CreateDropdown({
         Name = "Animation", 
-	List = {"Normal", "Slow", "New", "Fast", "Vertical Spin", "Exhibition", "Exhibition Old", "Custom", "SkidWare", "Sudicial", "SkidWareRevamped"}
+	List = {"Normal", "Slow", "New", "Fast", "Vertical Spin", "Exhibition", "Exhibition Old", "Custom", "SkidWare", "Sudicial", "SkidwareRevamped"}
         Function = function(val) end
     })
 	local oldviewmodel
