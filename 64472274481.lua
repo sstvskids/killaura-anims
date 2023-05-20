@@ -3722,7 +3722,7 @@ runFunction(function()
 			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(324), math.rad(78), math.rad(56)), Time = 0.1},
 			{CFrame = CFrame.new(0.69, -0.71, 0.6) * CFrame.Angles(math.rad(65), math.rad(56), math.rad(-45)), Time = 0.2}
 		},
-		SkidwareRevamped = {
+		Average = {
 			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-45), math.rad(70), math.rad(-90)), Time = 0.07},
 			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-89), math.rad(70), math.rad(-38)), Time = 0.13}
 		},
@@ -4053,7 +4053,7 @@ runFunction(function()
     })
     killauraanimmethod = Killaura.CreateDropdown({
         Name = "Animation", 
-	List = {"Normal", "Slow", "New", "Fast", "Vertical Spin", "Exhibition", "Exhibition Old", "Custom", "SkidWare", "Sudicial", "SkidwareRevamped"}
+	List = {"Normal", "Slow", "New", "Fast", "Vertical Spin", "Exhibition", "Exhibition Old", "Custom", "SkidWare", "Sudicial", "Average"}
         Function = function(val) end
     })
 	local oldviewmodel
