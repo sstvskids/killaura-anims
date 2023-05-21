@@ -3621,8 +3621,8 @@ runFunction(function()
 			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-89), math.rad(70), math.rad(-38)), Time = 0.13}
 		},
 		Spooky = {
-			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-68), math.rad(35), math.rad(-90)), Time = 0.08},
-			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-84), math.rad(12), math.rad(-38)), Time = 0.15}
+			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-32), math.rad(54), math.rad(-90)), Time = 0.08},
+			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-10), math.rad(38), math.rad(-38)), Time = 0.15}
 		},
 	}
 
