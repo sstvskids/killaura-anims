@@ -6334,16 +6334,6 @@ runFunction(function()
 				debug.setconstant(require(lplr.PlayerScripts.TS.controllers.global.hotbar.ui.healthbar["hotbar-healthbar"]).HotbarHealthbar.render, 16, 16745650)
 			end)
 		end
-		PurpleSky = function()
-			task.spawn(function()
-				game.Lighting.Sky.SkyboxBk = "http://www.roblox.com/asset/?id=570557514"
-				game.Lighting.Sky.SkyboxDn = "http://www.roblox.com/asset/?id=570557775"
-				game.Lighting.Sky.SkyboxFt = "http://www.roblox.com/asset/?id=570557559"
-				game.Lighting.Sky.SkyboxLf = "http://www.roblox.com/asset/?id=570557620"
-				game.Lighting.Sky.SkyboxRt = "http://www.roblox.com/asset/?id=570557672"
-				game.Lighting.Sky.SkyboxUp = "http://www.roblox.com/asset/?id=570557727"
-			end)
-		end
 	}
 
 	GameTheme = GuiLibrary.ObjectsThatCanBeSaved.RenderWindow.Api.CreateOptionsButton({
@@ -6367,7 +6357,7 @@ runFunction(function()
 	GameThemeMode = GameTheme.CreateDropdown({
 		Name = "Theme",
 		Function = function() end,
-		List = {"Old", "Winter", "Halloween", "Valentines", "PurpleSky"}
+		List = {"Old", "Winter", "Halloween", "Valentines"}
 	})
 end)
 
