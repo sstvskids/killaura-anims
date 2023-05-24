@@ -4563,6 +4563,7 @@ end)
 runFunction(function()
 	local projectileRemote = bedwars.ClientHandler:Get(bedwars.ProjectileRemote)
 	local GrappleDisabler = {Enabled = false}
+	local Range = {Value = 100000}
 	GrappleDisabler = GuiLibrary.ObjectsThatCanBeSaved.UtilityWindow.Api.CreateOptionsButton({
 		Name = "GrappleDisabler",
 		Function = function(callback)
@@ -4580,9 +4581,9 @@ runFunction(function()
 							local res
 							local starthit = tick()
 							repeat
-								task.wait(.05)
+								task.wait(.01)
 								local newpos = bedwarsStore.blocks[1].Position
-								local plr = (tick() - starthit) < 1.5 and EntityNearPosition(60, true) or nil
+								local plr = (tick() - starthit) < 1.5 and EntityNearPosition(Range.Value, true) or nil
 								local velo = Vector3.new(0, -60, 0)
 								if plr then 
 									local offsetStartPos = plr.RootPart.CFrame.p - plr.RootPart.CFrame.lookVector
@@ -4612,7 +4613,14 @@ runFunction(function()
 				end)
 			end
 		end, 
-		HoverText = "Lets you jump farther (Not landing on same level & Spamming can lead to lagbacks)"
+		HoverText = "Disables float check & speed check"
+	})
+	Range = GrappleDisabler.CreateSlider({
+		Name = "Range",
+		Function = function() end,
+		Min = 1,
+		Max = 100000,
+		Default = 10000
 	})
 end)
 
