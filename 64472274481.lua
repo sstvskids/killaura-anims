@@ -4594,6 +4594,70 @@ end)
 runFunction(function()
 	local projectileRemote = bedwars.ClientHandler:Get(bedwars.ProjectileRemote)
 	local GrappleDisabler = {Enabled = false}
+	local Range = {Value = 100000}
+	GrappleDisabler = GuiLibrary.ObjectsThatCanBeSaved.UtilityWindow.Api.CreateOptionsButton({
+		Name = "OLDGrappleDisabler",
+		Function = function(callback)
+			if callback then
+				table.insert(GrappleDisabler.Connections, bedwars.ClientHandler:Get("GrapplingHookFunctions"):Connect(function(p4)
+					if p4.hookFunction == "PLAYER_IN_TRANSIT" then
+						bedwarsStore.grapple = tick() + 1.5
+					end
+				end))
+				task.spawn(function()
+					repeat
+						task.wait()
+						local grapple = getItem("grappling_hook")
+						if grapple then 
+							local res
+							local starthit = tick()
+							repeat
+								task.wait(.01)
+								local newpos = bedwarsStore.blocks[1].Position
+								local plr = (tick() - starthit) < 1.5 and EntityNearPosition(Range.Value, true) or nil
+								local velo = Vector3.new(0, -60, 0)
+								if plr then 
+									local offsetStartPos = plr.RootPart.CFrame.p - plr.RootPart.CFrame.lookVector
+									local pos = plr.RootPart.Position
+									local playergrav = workspace.Gravity
+									local balloons = plr.Character:GetAttribute("InflatedBalloons")
+									if balloons and balloons > 0 then 
+										playergrav = (workspace.Gravity * (1 - ((balloons >= 4 and 1.2 or balloons >= 3 and 1 or 0.975))))
+									end
+									if plr.Character.PrimaryPart:FindFirstChild("rbxassetid://8200754399") then 
+										playergrav = (workspace.Gravity * 0.3)
+									end
+									local newLaunchVelo = bedwars.ProjectileMeta["grappling_hook_projectile"].launchVelocity
+									local shootpos, shootvelo = predictGravity(pos, plr.RootPart.Velocity, (pos - offsetStartPos).Magnitude / newLaunchVelo, plr, playergrav)
+									local newlook = CFrame.new(offsetStartPos, shootpos) * CFrame.new(Vector3.new(-bedwars.BowConstantsTable.RelX, -bedwars.BowConstantsTable.RelY, -bedwars.BowConstantsTable.RelZ))
+									shootpos = newlook.p + (newlook.lookVector * (offsetStartPos - shootpos).magnitude)
+									local calculated = LaunchDirection(offsetStartPos, shootpos, newLaunchVelo, workspace.Gravity, false)
+									if calculated then 
+										velo = calculated
+										newpos = offsetStartPos
+									end
+								end
+								res = projectileRemote:CallServerAsync(grapple.tool, nil, "grappling_hook_projectile", newpos, newpos, velo, game:GetService("HttpService"):GenerateGUID(true), {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045)
+							until res or (not GrappleDisabler.Enabled)
+						end
+					until (not GrappleDisabler.Enabled)
+				end)
+			end
+		end, 
+		HoverText = "Disables float check & speed check"
+	})
+	Range = GrappleDisabler.CreateSlider({
+		Name = "Range",
+		Function = function() end,
+		Min = 1,
+		Max = 100000,
+		Default = 10000
+	})
+end)
+
+runFunction(function()
+	local projectileRemote = bedwars.ClientHandler:Get(bedwars.ProjectileRemote)
+	local GrappleDisabler = {Enabled = false}
 	local GrappleDisablerRange = {Value = 60}
 	bedwars.ClientHandler:Get("GrapplingHookFunctions"):Connect(function(p4)
 		if p4.hookFunction == "PLAYER_IN_TRANSIT" then
