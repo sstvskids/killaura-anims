@@ -3295,7 +3295,6 @@ runFunction(function()
 	local GrappleExploitMode = {Value = "Normal"}
 	local GrappleExploitVerticalSpeed = {Value = 40}
 	local GrappleExploitVertical = {Enabled = true}
-	local GrappleOffSetRange = {Value = 10000000000}
 	local GrappleExploitUp = false
 	local GrappleExploitDown = false
 	local alternatelist = {"Normal", "AntiCheat A", "AntiCheat B"}
@@ -3327,9 +3326,8 @@ runFunction(function()
 						repeat task.wait() until bedwars.CooldownController:getRemainingCooldown("grappling_hook") == 0 or (not GrappleExploit.Enabled)
 						if (not GrappleExploit.Enabled) then return end
 						local pos = entityLibrary.character.HumanoidRootPart.CFrame.p
-						-- testing lmfao so expect bugs
-						local offsetshootpos = (CFrame.new(pos, pos + Vector3.new(0, -GrappleOffSetRange.Value, 0)) * CFrame.new(Vector3.new(-bedwars.BowConstantsTable.RelX, -bedwars.BowConstantsTable.RelY, -bedwars.BowConstantsTable.RelZ)))
-						projectileRemote:CallServerAsync(fireball["tool"], nil, "grappling_hook_projectile", offsetshootpos, pos, Vector3.new(0, -GrappleOffSetRange.Value, 0), game:GetService("HttpService"):GenerateGUID(true), {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045)
+						local offsetshootpos = (CFrame.new(pos, pos + Vector3.new(0, -60, 0)) * CFrame.new(Vector3.new(-bedwars.BowConstantsTable.RelX, -bedwars.BowConstantsTable.RelY, -bedwars.BowConstantsTable.RelZ)))
+						projectileRemote:CallServerAsync(fireball["tool"], nil, "grappling_hook_projectile", offsetshootpos, pos, Vector3.new(0, -60, 0), game:GetService("HttpService"):GenerateGUID(true), {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045)
 					end)
 				else
 					warningNotification("GrappleExploit", "missing grapple hook", 3)
@@ -3360,13 +3358,6 @@ runFunction(function()
 			end
 			return GrappleExploitMode.Value 
 		end
-	})
-	GrappleOffSetRange = GrappleExploit.CreateSlider({
-		Name = "Offset Range",
-		Min = 1,
-		Max = 10000000000,
-		Function = function(val) end, 
-		Default = 10000000000
 	})
 end)
 
