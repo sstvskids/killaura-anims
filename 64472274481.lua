@@ -3653,7 +3653,7 @@ runFunction(function()
 		},
 		N1san1StopFuckingAnnoyingMe = {
 			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-89), math.rad(45), math.rad(-34)), Time = 0.06},
-			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-65), math.rad(92), math.rad(-56)), Time = 0.09}
+			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-65), math.rad(-92), math.rad(-56)), Time = 0.09}
 		},
 		Spooky = {
 			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-65), math.rad(54), math.rad(-56)), Time = 0.08},
