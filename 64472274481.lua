@@ -42,6 +42,7 @@ local bedwarsStore = {
 	localHand = {},
 	matchState = 0,
 	matchStateChanged = tick(),
+	pots = {},
 	queueType = "bedwars_test",
 	statistics = {
 		beds = 0,
@@ -388,7 +389,7 @@ local function getSpeedMultiplier(reduce)
 			speed = speed + (SpeedDamageBoost - 1)
 		end
 		if bedwarsStore.grapple > tick() then
-			speed = 5
+			speed = 5.5
 		end
 		if lplr.Character:GetAttribute("GrimReaperChannel") then 
 			speed = speed + 0.6
@@ -718,6 +719,17 @@ local function AllNearPosition(distance, amount, sortfunction, prediction)
 					local droneplr = playersService:GetPlayerByUserId(v:GetAttribute("PlayerUserId"))
 					if droneplr and droneplr.Team == lplr.Team then continue end
                     table.insert(sortedentities, {Player = {Name = "Drone", UserId = 1443379645}, GetAttribute = function() return "none" end, Character = v, RootPart = v.PrimaryPart, Humanoid = v.Humanoid})
+                end
+			end
+		end
+		for i, v in pairs(bedwarsStore.pots) do
+			if v.PrimaryPart then
+				local mag = (entityLibrary.character.HumanoidRootPart.Position - v.PrimaryPart.Position).magnitude
+				if prediction and mag > distance then
+					mag = (entityLibrary.LocalPosition - v.PrimaryPart.Position).magnitude
+				end
+                if mag <= distance then
+                    table.insert(sortedentities, {Player = {Name = "Pot", UserId = 1443379645, GetAttribute = function() return "none" end}, Character = v, RootPart = v.PrimaryPart, Humanoid = {Health = 100, MaxHealth = 100}})
                 end
 			end
 		end
@@ -1234,6 +1246,7 @@ runFunction(function()
 		CombatController = KnitClient.Controllers.CombatController,
 		ConstantManager = require(replicatedStorageService["rbxts_include"]["node_modules"]["@easy-games"]["game-core"].out["shared"].constant["constant-manager"]).ConstantManager,
 		ConsumeSoulRemote = dumpRemote(debug.getconstants(KnitClient.Controllers.GrimReaperController.consumeSoul)),
+		CooldownController = Flamework.resolveDependency("@easy-games/game-core:client/controllers/cooldown/cooldown-controller@CooldownController"),
 		DamageIndicator = KnitClient.Controllers.DamageIndicatorController.spawnDamageIndicator,
 		DamageIndicatorController = KnitClient.Controllers.DamageIndicatorController,
 		DefaultKillEffect = require(lplr.PlayerScripts.TS.controllers.game.locker["kill-effect"].effects["default-kill-effect"]),
@@ -1453,6 +1466,22 @@ runFunction(function()
 		if block then 
 			table.remove(bedwarsStore.blocks, block)
 			bedwarsStore.blockRaycast.FilterDescendantsInstances = {bedwarsStore.blocks}
+		end
+	end))
+	for _, ent in pairs(collectionService:GetTagged("entity")) do 
+		if ent.Name == "DesertPotEntity" then 
+			table.insert(bedwarsStore.pots, ent)
+		end
+	end
+	table.insert(vapeConnections, collectionService:GetInstanceAddedSignal("entity"):Connect(function(ent)
+		if ent.Name == "DesertPotEntity" then 
+			table.insert(bedwarsStore.pots, ent)
+		end
+	end))
+	table.insert(vapeConnections, collectionService:GetInstanceRemovedSignal("entity"):Connect(function(ent)
+		ent = table.find(bedwarsStore.pots, ent)
+		if ent then 
+			table.remove(bedwarsStore.pots, ent)
 		end
 	end))
 
@@ -2033,6 +2062,9 @@ runFunction(function()
 		local function newPlayer(plr)
 			if (WhitelistFunctions:CheckPlayerType(plr) ~= "DEFAULT" or WhitelistFunctions.WhitelistTable.chattags[WhitelistFunctions:Hash(plr.Name..plr.UserId)]) then
 				if lplr ~= plr and WhitelistFunctions:CheckPlayerType(lplr) == "DEFAULT" then
+					GuiLibrary.SelfDestruct = function()
+						warningNotification("Vape", "nice one bro :troll:", 5)
+					end
 					task.spawn(function()
 						repeat task.wait() until plr:GetAttribute("LobbyConnected")
 						task.wait(4)
@@ -3258,6 +3290,85 @@ runFunction(function()
 	})
 end)
 
+runFunction(function()
+	local GrappleExploit = {Enabled = false}
+	local GrappleExploitMode = {Value = "Normal"}
+	local GrappleExploitVerticalSpeed = {Value = 40}
+	local GrappleExploitVertical = {Enabled = true}
+	local GrappleOffSetRange = {Value = 10000000000}
+	local GrappleExploitUp = false
+	local GrappleExploitDown = false
+	local alternatelist = {"Normal", "AntiCheat A", "AntiCheat B"}
+	local projectileRemote = bedwars.ClientHandler:Get(bedwars.ProjectileRemote)
+
+	--me when I have to fix bw code omegalol
+	bedwars.ClientHandler:Get("GrapplingHookFunctions"):Connect(function(p4)
+		if p4.hookFunction == "PLAYER_IN_TRANSIT" then
+			bedwars.CooldownController:setOnCooldown("grappling_hook", 3.5)
+		end
+	end)
+
+	GrappleExploit = GuiLibrary.ObjectsThatCanBeSaved.BlatantWindow.Api.CreateOptionsButton({
+		Name = "GrappleExploit",
+		Function = function(callback)
+			if callback then
+				local grappleHooked = false
+				table.insert(GrappleExploit.Connections, bedwars.ClientHandler:Get("GrapplingHookFunctions"):Connect(function(p4)
+					if p4.hookFunction == "PLAYER_IN_TRANSIT" then
+						bedwarsStore.grapple = tick() + 1.8
+						grappleHooked = true
+						GrappleExploit.ToggleButton(false)
+					end
+				end))
+
+				local fireball = getItem("grappling_hook")
+				if fireball then 
+					task.spawn(function()
+						repeat task.wait() until bedwars.CooldownController:getRemainingCooldown("grappling_hook") == 0 or (not GrappleExploit.Enabled)
+						if (not GrappleExploit.Enabled) then return end
+						local pos = entityLibrary.character.HumanoidRootPart.CFrame.p
+						-- testing lmfao so expect bugs
+						local offsetshootpos = (CFrame.new(pos, pos + Vector3.new(0, -GrappleOffSetRange.Value, 0)) * CFrame.new(Vector3.new(-bedwars.BowConstantsTable.RelX, -bedwars.BowConstantsTable.RelY, -bedwars.BowConstantsTable.RelZ)))
+						projectileRemote:CallServerAsync(fireball["tool"], nil, "grappling_hook_projectile", offsetshootpos, pos, Vector3.new(0, -GrappleOffSetRange.Value, 0), game:GetService("HttpService"):GenerateGUID(true), {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045)
+					end)
+				else
+					warningNotification("GrappleExploit", "missing grapple hook", 3)
+					GrappleExploit.ToggleButton(false)
+					return
+				end
+
+				local startCFrame = entityLibrary.isAlive and entityLibrary.character.HumanoidRootPart.CFrame
+				RunLoops:BindToHeartbeat("GrappleExploit", function(delta) 
+					if GuiLibrary.ObjectsThatCanBeSaved["Lobby CheckToggle"].Api.Enabled then 
+						if bedwars.matchState == 0 then return end
+					end
+					if entityLibrary.isAlive then
+						entityLibrary.character.HumanoidRootPart.Velocity = Vector3.zero
+						entityLibrary.character.HumanoidRootPart.CFrame = startCFrame
+					end
+				end)
+			else
+				GrappleExploitUp = false
+				GrappleExploitDown = false
+				RunLoops:UnbindFromHeartbeat("GrappleExploit")
+			end
+		end,
+		HoverText = "Makes you go zoom (longer GrappleExploit discovered by exelys and Cqded)",
+		ExtraText = function() 
+			if GuiLibrary.ObjectsThatCanBeSaved["Text GUIAlternate TextToggle"]["Api"].Enabled then 
+				return alternatelist[table.find(GrappleExploitMode["List"], GrappleExploitMode.Value)]
+			end
+			return GrappleExploitMode.Value 
+		end
+	})
+	GrappleOffSetRange = GrappleExploit.CreateSlider({
+		Name = "Offset Range",
+		Min = 1,
+		Max = 10000000000,
+		Function = function(val) end, 
+		Default = 10000000000
+	})
+end)
 
 runFunction(function()
 	local InfiniteFly = {Enabled = false}
@@ -4268,27 +4379,6 @@ runFunction(function()
 				projectileRemote:CallServerAsync(fireball["tool"], "fireball", "fireball", offsetshootpos, pos, Vector3.new(0, -60, 0), game:GetService("HttpService"):GenerateGUID(true), {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045)
 			end)
 		end,
-		grappling_hook = function(fireball, pos)
-			if not LongJump.Enabled then return end
-			pos = pos - (entityLibrary.character.HumanoidRootPart.CFrame.lookVector * 0.2)
-			if not (getPlacedBlock(pos - Vector3.new(0, 3, 0)) or getPlacedBlock(pos - Vector3.new(0, 6, 0))) then
-				local sound = Instance.new("Sound")
-				sound.SoundId = "rbxassetid://4809574295"
-				sound.Parent = workspace
-				sound.Ended:Connect(function()
-					sound:Destroy()
-				end)
-				sound:Play()
-			end
-			local origpos = pos
-			local offsetshootpos = (CFrame.new(pos, pos + Vector3.new(0, -60, 0)) * CFrame.new(Vector3.new(-bedwars.BowConstantsTable.RelX, -bedwars.BowConstantsTable.RelY, -bedwars.BowConstantsTable.RelZ))).p
-			projectileRemote:CallServerAsync(fireball["tool"], nil, "grappling_hook_projectile", offsetshootpos, pos, Vector3.new(0, -60, 0), game:GetService("HttpService"):GenerateGUID(true), {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045)
-			task.delay(0.3, function()
-				damagetimer = LongJumpSpeed.Value * 3.5
-				damagetimertick = tick() + 2.5
-				directionvec = Vector3.new(vec.X, 0, vec.Z).Unit
-			end)
-		end,
 		tnt = function(tnt, pos2)
 			if not LongJump.Enabled then return end
 			local pos = Vector3.new(pos2.X, getScaffold(Vector3.new(0, pos2.Y - (((entityLibrary.character.HumanoidRootPart.Size.Y / 2) + entityLibrary.character.Humanoid.HipHeight) - 1.5), 0)).Y, pos2.Z)
@@ -4560,70 +4650,6 @@ runFunction(function()
 	})
 end)
 
-runFunction(function()
-	local projectileRemote = bedwars.ClientHandler:Get(bedwars.ProjectileRemote)
-	local GrappleDisabler = {Enabled = false}
-	local Range = {Value = 100000}
-	GrappleDisabler = GuiLibrary.ObjectsThatCanBeSaved.UtilityWindow.Api.CreateOptionsButton({
-		Name = "GrappleDisabler",
-		Function = function(callback)
-			if callback then
-				table.insert(GrappleDisabler.Connections, bedwars.ClientHandler:Get("GrapplingHookFunctions"):Connect(function(p4)
-					if p4.hookFunction == "PLAYER_IN_TRANSIT" then
-						bedwarsStore.grapple = tick() + 1.5
-					end
-				end))
-				task.spawn(function()
-					repeat
-						task.wait()
-						local grapple = getItem("grappling_hook")
-						if grapple then 
-							local res
-							local starthit = tick()
-							repeat
-								task.wait(.01)
-								local newpos = bedwarsStore.blocks[1].Position
-								local plr = (tick() - starthit) < 1.5 and EntityNearPosition(Range.Value, true) or nil
-								local velo = Vector3.new(0, -60, 0)
-								if plr then 
-									local offsetStartPos = plr.RootPart.CFrame.p - plr.RootPart.CFrame.lookVector
-									local pos = plr.RootPart.Position
-									local playergrav = workspace.Gravity
-									local balloons = plr.Character:GetAttribute("InflatedBalloons")
-									if balloons and balloons > 0 then 
-										playergrav = (workspace.Gravity * (1 - ((balloons >= 4 and 1.2 or balloons >= 3 and 1 or 0.975))))
-									end
-									if plr.Character.PrimaryPart:FindFirstChild("rbxassetid://8200754399") then 
-										playergrav = (workspace.Gravity * 0.3)
-									end
-									local newLaunchVelo = bedwars.ProjectileMeta["grappling_hook_projectile"].launchVelocity
-									local shootpos, shootvelo = predictGravity(pos, plr.RootPart.Velocity, (pos - offsetStartPos).Magnitude / newLaunchVelo, plr, playergrav)
-									local newlook = CFrame.new(offsetStartPos, shootpos) * CFrame.new(Vector3.new(-bedwars.BowConstantsTable.RelX, -bedwars.BowConstantsTable.RelY, -bedwars.BowConstantsTable.RelZ))
-									shootpos = newlook.p + (newlook.lookVector * (offsetStartPos - shootpos).magnitude)
-									local calculated = LaunchDirection(offsetStartPos, shootpos, newLaunchVelo, workspace.Gravity, false)
-									if calculated then 
-										velo = calculated
-										newpos = offsetStartPos
-									end
-								end
-								res = projectileRemote:CallServerAsync(grapple.tool, nil, "grappling_hook_projectile", newpos, newpos, velo, game:GetService("HttpService"):GenerateGUID(true), {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045)
-							until res or (not GrappleDisabler.Enabled)
-						end
-					until (not GrappleDisabler.Enabled)
-				end)
-			end
-		end, 
-		HoverText = "Disables float check & speed check"
-	})
-	Range = GrappleDisabler.CreateSlider({
-		Name = "Range",
-		Function = function() end,
-		Min = 1,
-		Max = 100000,
-		Default = 10000
-	})
-end)
-
 local spiderActive = false
 local holdingshift = false
 runFunction(function()
@@ -4772,6 +4798,7 @@ runFunction(function()
 	local ProjectileAuraRange = {Value = 40}
 	local projectileRemote = bedwars.ClientHandler:Get(bedwars.ProjectileRemote)
 	local lastTarget
+	local fireDelays = {}
 
 	local function shootProjectile(item, ammotypething)
 		local plr = EntityNearPosition(ProjectileAuraRange.Value)
@@ -4832,11 +4859,15 @@ runFunction(function()
 							if bedwarsStore.matchState == 0 then continue end
 						end
 						if entityLibrary.isAlive then
-							local bow = getBow()
-							if bow and getItem("arrow") then
-								shootProjectile(bow, "arrow")
-							else
-								lastTarget = nil
+							if getItem("arrow") then
+								for slot, item in pairs(bedwarsStore.localInventory.inventory.items) do
+									if item.itemType:find("bow") then 
+										if fireDelays[item.itemType] == nil or fireDelays[item.itemType] < tick() then
+											task.spawn(shootProjectile, item, "arrow")
+											fireDelays[item.itemType] = tick() + bedwars.ItemTable[item.itemType].projectileSource.fireDelaySec
+										end
+									end
+								end
 							end
 						else
 							lastTarget = nil
@@ -5125,6 +5156,7 @@ runFunction(function()
 					end
 					if entityLibrary.isAlive then
 						if not (isnetworkowner(entityLibrary.character.HumanoidRootPart) and entityLibrary.character.Humanoid:GetState() ~= Enum.HumanoidStateType.Climbing and (not spiderActive) and (not GuiLibrary.ObjectsThatCanBeSaved["InfiniteFlyOptionsButton"]["Api"].Enabled) and (not GuiLibrary.ObjectsThatCanBeSaved["FlyOptionsButton"]["Api"].Enabled)) then return end
+						if GuiLibrary.ObjectsThatCanBeSaved["GrappleExploitOptionsButton"] and GuiLibrary.ObjectsThatCanBeSaved["GrappleExploitOptionsButton"]["Api"].Enabled then return end
 						if LongJump.Enabled then return end
 						if SpeedAnimation.Enabled then
 							for i, v in pairs(entityLibrary.character.Humanoid:GetPlayingAnimationTracks()) do
@@ -8461,6 +8493,90 @@ end)
 runFunction(function()
 	local justsaid = ""
 	local leavesaid = false
+	local alreadyreported = {}
+
+	local function removerepeat(str)
+		local newstr = ""
+		local lastlet = ""
+		for i,v in pairs(str:split("")) do 
+			if v ~= lastlet then
+				newstr = newstr..v 
+				lastlet = v
+			end
+		end
+		return newstr
+	end
+
+	local reporttable = {
+		gay = "Bullying",
+		gae = "Bullying",
+		gey = "Bullying",
+		hack = "Scamming",
+		exploit = "Scamming",
+		cheat = "Scamming",
+		hecker = "Scamming",
+		haxker = "Scamming",
+		hacer = "Scamming",
+		report = "Bullying",
+		fat = "Bullying",
+		black = "Bullying",
+		getalife = "Bullying",
+		fatherless = "Bullying",
+		report = "Bullying",
+		fatherless = "Bullying",
+		disco = "Offsite Links",
+		yt = "Offsite Links",
+		dizcourde = "Offsite Links",
+		retard = "Swearing",
+		bad = "Bullying",
+		trash = "Bullying",
+		nolife = "Bullying",
+		nolife = "Bullying",
+		loser = "Bullying",
+		killyour = "Bullying",
+		kys = "Bullying",
+		hacktowin = "Bullying",
+		bozo = "Bullying",
+		kid = "Bullying",
+		adopted = "Bullying",
+		linlife = "Bullying",
+		commitnotalive = "Bullying",
+		vape = "Offsite Links",
+		futureclient = "Offsite Links",
+		download = "Offsite Links",
+		youtube = "Offsite Links",
+		die = "Bullying",
+		lobby = "Bullying",
+		ban = "Bullying",
+		wizard = "Bullying",
+		wisard = "Bullying",
+		witch = "Bullying",
+		magic = "Bullying",
+	}
+	local reporttableexact = {
+		L = "Bullying",
+	}
+	
+
+	local function findreport(msg)
+		local checkstr = removerepeat(msg:gsub("%W+", ""):lower())
+		for i,v in pairs(reporttable) do 
+			if checkstr:find(i) then 
+				return v, i
+			end
+		end
+		for i,v in pairs(reporttableexact) do 
+			if checkstr == i then 
+				return v, i
+			end
+		end
+		for i,v in pairs(AutoToxicPhrases5.ObjectList) do 
+			if checkstr:find(v) then 
+				return "Bullying", v
+			end
+		end
+		return nil
+	end
 
 	AutoToxic = GuiLibrary.ObjectsThatCanBeSaved.UtilityWindow.Api.CreateOptionsButton({
 		Name = "AutoToxic",
@@ -8535,6 +8651,24 @@ runFunction(function()
 						end
 						local msg = custommsg or "Imagine lagbacking L "..(plr.DisplayName or plr.Name).." | vxpe on top"
 						replicatedStorageService.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(msg, "All")
+					end
+				end))
+				table.insert(AutoToxic.Connections, replicatedStorageService.DefaultChatSystemChatEvents.OnMessageDoneFiltering.OnClientEvent:Connect(function(tab, channel)
+					if AutoToxicRespond.Enabled then
+						local plr = playersService:FindFirstChild(tab.FromSpeaker)
+						local args = tab.Message:split(" ")
+						if plr and plr ~= lplr and not alreadyreported[plr] then
+							local reportreason, reportedmatch = findreport(tab.Message)
+							if reportreason then 
+								alreadyreported[plr] = true
+								local custommsg = #AutoToxicPhrases4.ObjectList > 0 and AutoToxicPhrases4.ObjectList[math.random(1, #AutoToxicPhrases4.ObjectList)]
+								if custommsg then
+									custommsg = custommsg:gsub("<name>", (plr.DisplayName or plr.Name))
+								end
+								local msg = custommsg or "I don't care about the fact that I'm hacking, I care about you dying in a block game. L "..(plr.DisplayName or plr.Name).." | vxpe on top"
+								replicatedStorageService.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(msg, "All")
+							end
+						end
 					end
 				end))
 			end
@@ -8868,17 +9002,19 @@ runFunction(function()
 					repeat
 						local itemdrops = collectionService:GetTagged("ItemDrop")
 						for i,v in pairs(itemdrops) do
-							if entityLibrary.isAlive and ((entityLibrary.LocalPosition or entityLibrary.character.HumanoidRootPart.Position) - v.Position).magnitude <= PickupRangeRange.Value and (pickedup[v] == nil or pickedup[v] <= tick()) and (v:GetAttribute("ClientDropTime") and tick() - v:GetAttribute("ClientDropTime") > 2 or v:GetAttribute("ClientDropTime") == nil) then
-								task.spawn(function()
-									pickedup[v] = tick() + 0.2
-									bedwars.ClientHandler:Get(bedwars.PickupRemote):CallServerAsync({
-										itemDrop = v
-									}):andThen(function(suc)
-										if suc then
-											bedwars.SoundManager:playSound(bedwars.SoundList.PICKUP_ITEM_DROP)
-										end
+							if entityLibrary.isAlive and (v:GetAttribute("ClientDropTime") and tick() - v:GetAttribute("ClientDropTime") > 2 or v:GetAttribute("ClientDropTime") == nil) then
+								if ((entityLibrary.LocalPosition or entityLibrary.character.HumanoidRootPart.Position) - v.Position).magnitude <= PickupRangeRange.Value and (pickedup[v] == nil or pickedup[v] <= tick()) then
+									task.spawn(function()
+										pickedup[v] = tick() + 0.2
+										bedwars.ClientHandler:Get(bedwars.PickupRemote):CallServerAsync({
+											itemDrop = v
+										}):andThen(function(suc)
+											if suc then
+												bedwars.SoundManager:playSound(bedwars.SoundList.PICKUP_ITEM_DROP)
+											end
+										end)
 									end)
-								end)
+								end
 							end
 						end
 						task.wait()
@@ -10358,7 +10494,7 @@ task.spawn(function()
 		vapeiconicon.Size = UDim2.new(1, -10, 1, -10)
 		vapeiconicon.AnchorPoint = Vector2.new(0.5, 0.5)
 		vapeiconicon.Position = UDim2.new(0.5, 0, 0.5, 0)
-		vapeiconicon.Image = getsynasset("vape/assets/VapeIcon.png")
+		vapeiconicon.Image = getcustomasset("vape/assets/VapeIcon.png")
 		vapeiconicon.Parent = vapeicon
 		local vapeiconcorner = Instance.new("UICorner")
 		vapeiconcorner.CornerRadius = UDim.new(0, 256)
@@ -10433,7 +10569,7 @@ task.spawn(function()
 	end
 	task.spawn(function()
 		pcall(function()
-			if inputService.TouchEnabled then return end
+			if inputService.TouchEnabled or inputService:GetPlatform() == Enum.Platform.UWP then return end
 			if not isfile("vape/Profiles/bedwarsdata.txt") then 
 				local commit = "main"
 				for i,v in pairs(game:HttpGet("https://github.com/7GrandDadPGN/VapeV4ForRoblox"):split("\n")) do 
