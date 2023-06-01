@@ -10275,9 +10275,9 @@ runFunction(function()
 								if not entityLibrary.isAlive then return end
 								if not entityLibrary.character.Humanoid:IsDescendantOf(workspace) then return end
 								if entityLibrary.character.Humanoid.MoveDirection.Magnitude < 0.1 then 
-									lplr:Move(entityLibrary.character.HumanoidRootPart.CFrame.lookVector * 0.004, false)
+									lplr:Move(entityLibrary.character.HumanoidRootPart.CFrame.lookVector * 0.001, false)
 									task.wait()
-									lplr:Move(entityLibrary.character.HumanoidRootPart.CFrame.lookVector * -0.004, false)
+									lplr:Move(entityLibrary.character.HumanoidRootPart.CFrame.lookVector * -0.001, false)
 								end
 							end)
 						end
