@@ -10275,9 +10275,9 @@ runFunction(function()
 								if not entityLibrary.isAlive then return end
 								if not entityLibrary.character.Humanoid:IsDescendantOf(workspace) then return end
 								if entityLibrary.character.Humanoid.MoveDirection.Magnitude < 0.1 then 
-									lplr:Move(entityLibrary.character.HumanoidRootPart.CFrame.lookVector * 0.001, false)
+									lplr:Move(entityLibrary.character.HumanoidRootPart.CFrame.lookVector * 0.005, false)
 									task.wait()
-									lplr:Move(entityLibrary.character.HumanoidRootPart.CFrame.lookVector * -0.001, false)
+									lplr:Move(entityLibrary.character.HumanoidRootPart.CFrame.lookVector * -0.005, false)
 								end
 							end)
 						end
@@ -10315,7 +10315,7 @@ runFunction(function()
 				end)
 				table.insert(CrashAura.Connections, vapeEvents.EntityDamageEvent.Event:Connect(function(damageTable)
 					if damageTable.entityInstance == lplr.Character then 
-						damagetick = tick() + 0.5
+						damagetick = tick() - 100
 					end
 				end))
 			end
