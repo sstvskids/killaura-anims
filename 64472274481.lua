@@ -10844,8 +10844,9 @@ runFunction(function()
 						end
 					end
 				end
-
 				spawn(animateRainbow)
+			else
+				ScreenGUI:Destroy()
 			end
 		end
 	})
