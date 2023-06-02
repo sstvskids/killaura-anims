@@ -10755,7 +10755,7 @@ runFunction(function()
 	local WatermarkDisplay = {}
 	local Watermark
 	WatermarkDisplay = GuiLibrary.CreateLegitModule({
-		Name = "Skid-Ware Watermark",
+		Name = "Watermark",
 		Function = function(callback)
 			if callback then 
 				task.spawn(function()
@@ -10765,7 +10765,7 @@ runFunction(function()
 		end
 	})
 	Watermark = Instance.new("TextLabel")
-	Watermark.Size = UDim2.new(0, 300, 0, 65)
+	Watermark.Size = UDim2.new(0, 100, 0, 41)
 	Watermark.BackgroundTransparency = 0.5
 	Watermark.TextSize = 15
 	Watermark.Font = Enum.Font.Gotham
