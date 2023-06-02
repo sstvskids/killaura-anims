@@ -3740,6 +3740,10 @@ runFunction(function()
 			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-65), math.rad(54), math.rad(-56)), Time = 0.08},
 			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-98), math.rad(38), math.rad(-23)), Time = 0.15}
 		},
+		["SkidWareNEW"] = {
+			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-65), math.rad(98), math.rad(-354)), Time = 0.1},
+			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-98), math.rad(65), math.rad(-68)), Time = 0.2}
+		}
 	}
 
 	local function closestpos(block, pos)
@@ -4067,7 +4071,7 @@ runFunction(function()
     })
     killauraanimmethod = Killaura.CreateDropdown({
         Name = "Animation", 
-	List = {"Normal", "Slow", "New", "Fast", "SlowAndFast", "Exhibition", "SkidWare", "Moonsoon", "N1san1StopFuckingAnnoyingMe", "Spooky"},
+	List = {"Normal", "Slow", "New", "Fast", "SlowAndFast", "Exhibition", "SkidWare", "Moonsoon", "N1san1StopFuckingAnnoyingMe", "Spooky"}, "SkidWareNEW",
         Function = function(val) end
     })
 	local oldviewmodel
