@@ -10751,33 +10751,6 @@ runFunction(function()
 	ReachCorner.Parent = ReachLabel
 end)
 
-runFunction(function()
-	local WatermarkDisplay = {}
-	local Watermark
-	WatermarkDisplay = GuiLibrary.CreateLegitModule({
-		Name = "Watermark",
-		Function = function(callback)
-			if callback then 
-				task.spawn(function()
-					Watermark.Text = "Skid-Ware"
-				end)
-			end
-		end
-	})
-	Watermark = Instance.new("TextLabel")
-	Watermark.Size = UDim2.new(0, 100, 0, 41)
-	Watermark.BackgroundTransparency = 0.5
-	Watermark.TextSize = 15
-	Watermark.Font = Enum.Font.Gotham
-	Watermark.Text = "Skid-Ware"
-	Watermark.TextColor3 = Color3.new(1, 1, 1)
-	Watermark.BackgroundColor3 = Color3.new()
-	Watermark.Parent = ReachDisplay.GetCustomChildren()
-	local WatermarkCorner = Instance.new("UICorner")
-	WatermarkCorner.CornerRadius = UDim.new(0, 4)
-	WatermarkCorner.Parent = ReachLabel
-end)
-
 task.spawn(function()
 	local function createannouncement(announcetab)
 		local vapenotifframe = Instance.new("TextButton")
