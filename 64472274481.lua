@@ -4071,7 +4071,7 @@ runFunction(function()
     })
     killauraanimmethod = Killaura.CreateDropdown({
         Name = "Animation", 
-	List = {"Normal", "Slow", "New", "Fast", "SlowAndFast", "Exhibition", "SkidWare", "Moonsoon", "N1san1StopFuckingAnnoyingMe", "Spooky", "SkidWareNEW",}
+	List = {"Normal", "Slow", "New", "Fast", "SlowAndFast", "Exhibition", "SkidWare", "Moonsoon", "N1san1StopFuckingAnnoyingMe", "Spooky", "SkidWareNEW"},
         Function = function(val) end
     })
 	local oldviewmodel
@@ -5180,9 +5180,9 @@ runFunction(function()
 						entityLibrary.character.HumanoidRootPart.Velocity = antivoidvelo or Vector3.new(speedVelocity.X, entityLibrary.character.HumanoidRootPart.Velocity.Y, speedVelocity.Z)
 						if SpeedMode.Value ~= "Normal" then 
 							if SpeedMode.Value == "Heatseeker" then 
-								speedValue = tick() % 1 < 0.6 and 5 or (20 * getSpeedMultiplier(true)) / 0.4
+								speedValue = tick() % 1 < 0.6 and 5 or (70 * getSpeedMultiplier(true)) / 0.4
 							end
-							local speedCFrame = entityLibrary.character.Humanoid.MoveDirection * (speedValue - 20) * delta
+							local speedCFrame = entityLibrary.character.Humanoid.MoveDirection * (speedValue - 70) * delta
 							raycastparameters.FilterDescendantsInstances = {lplr.Character}
 							local ray = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, speedCFrame, raycastparameters)
 							if ray then speedCFrame = (ray.Position - entityLibrary.character.HumanoidRootPart.Position) end
