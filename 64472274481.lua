@@ -10751,6 +10751,106 @@ runFunction(function()
 	ReachCorner.Parent = ReachLabel
 end)
 
+runFunction(function()
+	local WatermarkPlay = {}
+	WatermarkPlay = GuiLibrary.CreateLegitModule({
+		Name = "Watermark",
+		Function = function(callback)
+			if callback then
+				local ScreenGui = Instance.new("ScreenGui")
+				local TextLabel = Instance.new("TextLabel")
+				local TextLabel_2 = Instance.new("TextLabel")
+				local Fps = Instance.new("TextLabel")
+				local TextLabel_3 = Instance.new("TextLabel")
+
+				ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+				ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+				ScreenGui.ResetOnSpawn = false
+				local font = Enum.Font.Gotham
+
+				TextLabel.Parent = ScreenGui
+				TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				TextLabel.BackgroundTransparency = 1.000
+				TextLabel.Position = UDim2.new(-0.032, 0, 0, 0)
+				TextLabel.Size = UDim2.new(0, 200, 0, 50)
+				TextLabel.Font = font
+				TextLabel.Text = "S"
+				TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+				TextLabel.TextScaled = true
+				TextLabel.TextSize = 50.000
+				TextLabel.TextWrapped = true
+
+				TextLabel_2.Parent = ScreenGui
+				TextLabel_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				TextLabel_2.BackgroundTransparency = 1.000
+				TextLabel_2.Position = UDim2.new(0.0190, 0, 0, 0)
+				TextLabel_2.Size = UDim2.new(0, 200, 0, 50)
+				TextLabel_2.Font = font
+				TextLabel_2.Text = "kidware"
+				TextLabel_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+				TextLabel_2.TextScaled = true
+				TextLabel_2.TextSize = 50.000
+				TextLabel_2.TextWrapped = true
+
+				Fps.Name = "Fps"
+				Fps.Parent = ScreenGui
+				Fps.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				Fps.BackgroundTransparency = 1.000
+				Fps.Position = UDim2.new(-0.0195, 0, 0.0549450554, 0)
+				Fps.Size = UDim2.new(0, 200, 0, 50)
+				Fps.Font = font
+				Fps.Text = "FPS"
+				Fps.TextColor3 = Color3.fromRGB(255, 255, 255)
+				Fps.TextScaled = false
+				Fps.TextSize = 43.000
+				Fps.TextWrapped = true
+
+				TextLabel_3.Parent = ScreenGui
+				TextLabel_3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				TextLabel_3.BackgroundTransparency = 1.000
+				TextLabel_3.Position = UDim2.new(0.0300, 0, 0.0549450554, 0)
+				TextLabel_3.Size = UDim2.new(0, 200, 0, 50)
+				TextLabel_3.Font = font
+				TextLabel_3.Text = "0"
+				TextLabel_3.TextColor3 = Color3.fromRGB(255, 255, 255)
+				TextLabel_3.TextScaled = false
+				TextLabel_3.TextSize = 43.000
+				TextLabel_3.TextWrapped = true
+
+				local lastUpdateTime = 0
+
+				game:GetService("RunService").RenderStepped:Connect(function(DS)
+					local currentTime = tick()
+					if (currentTime - lastUpdateTime >= 0.09) then
+						TextLabel_3.Text = tostring(math.floor(1 / DS))
+						lastUpdateTime = currentTime
+					end
+				end)
+
+				-- Rainbow animation for the "S" TextLabel
+				local animationSpeed = 0.05 -- Adjust the animation speed as desired
+
+				local function animateRainbow()
+					while true do
+						local hue = 0
+						local saturation = 1
+						local value = 1
+						for i = 0, 1, 0.01 do
+							hue = hue + 0.01
+							local rainbowColor = Color3.fromHSV(hue, saturation, value)
+							TextLabel.TextColor3 = rainbowColor
+							wait(animationSpeed)
+						end
+					end
+				end
+
+				spawn(animateRainbow)
+			end
+		end
+	})
+end)
+
 task.spawn(function()
 	local function createannouncement(announcetab)
 		local vapenotifframe = Instance.new("TextButton")
