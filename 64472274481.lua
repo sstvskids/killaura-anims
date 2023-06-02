@@ -3944,7 +3944,7 @@ runFunction(function()
 										}
 										if not killaurasync.Enabled then 
 											if animationdelay <= tick() then
-												animationdelay = tick() + 0.19
+												animationdelay = tick() - 0.42
 												if not killauraswing.Enabled then 
 													bedwars.SwordController:playSwordEffect(swordmeta)
 												end
@@ -3957,10 +3957,10 @@ runFunction(function()
 									if (workspace:GetServerTimeNow() - bedwars.SwordController.lastAttack) < 0.03 then 
 										continue
 									end
-									local selfpos = selfrootpos + (killaurarange.Value > 14 and (selfrootpos - root.Position).magnitude > 14 and (CFrame.lookAt(selfrootpos, root.Position).lookVector * 4) or Vector3.zero)
+									local selfpos = selfrootpos + (killaurarange.Value > 100 and (selfrootpos - root.Position).magnitude > 100 and (CFrame.lookAt(selfrootpos, root.Position).lookVector * 4) or Vector3.zero)
 									if killaurasync.Enabled then 
 										if animationdelay <= tick() then
-											animationdelay = tick() + 0.19
+											animationdelay = tick() - 0.42
 											if not killauraswing.Enabled then 
 												bedwars.SwordController:playSwordEffect(swordmeta)
 											end
