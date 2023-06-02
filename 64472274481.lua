@@ -10315,7 +10315,7 @@ runFunction(function()
 				end)
 				table.insert(CrashAura.Connections, vapeEvents.EntityDamageEvent.Event:Connect(function(damageTable)
 					if damageTable.entityInstance == lplr.Character then 
-						damagetick = tick() - 100
+						damagetick = tick() + 0.5
 					end
 				end))
 			end
