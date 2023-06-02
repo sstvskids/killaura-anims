@@ -5185,9 +5185,9 @@ runFunction(function()
 						entityLibrary.character.HumanoidRootPart.Velocity = antivoidvelo or Vector3.new(speedVelocity.X, entityLibrary.character.HumanoidRootPart.Velocity.Y, speedVelocity.Z)
 						if SpeedMode.Value ~= "Normal" then 
 							if SpeedMode.Value == "Heatseeker" then 
-								speedValue = tick() % 1 < 0.6 and 5 or (24 * getSpeedMultiplier(true)) / 0.4
+								speedValue = tick() % 1 < 0.6 and 5 or (32 * getSpeedMultiplier(true)) / 0.2
 							end
-							local speedCFrame = entityLibrary.character.Humanoid.MoveDirection * (speedValue - 24) * delta
+							local speedCFrame = entityLibrary.character.Humanoid.MoveDirection * (speedValue - 32) * delta
 							raycastparameters.FilterDescendantsInstances = {lplr.Character}
 							local ray = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, speedCFrame, raycastparameters)
 							if ray then speedCFrame = (ray.Position - entityLibrary.character.HumanoidRootPart.Position) end
