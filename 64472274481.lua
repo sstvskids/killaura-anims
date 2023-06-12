@@ -1509,7 +1509,7 @@ runFunction(function()
 				end
 			end
 		end
-		if getconnections then 
+		--[[if getconnections then 
 			for i,v in pairs(getconnections(replicatedStorageService.DefaultChatSystemChatEvents.OnNewMessage.OnClientEvent)) do
 				if v.Function and #debug.getupvalues(v.Function) > 0 and type(debug.getupvalues(v.Function)[1]) == "table" and getmetatable(debug.getupvalues(v.Function)[1]) and getmetatable(debug.getupvalues(v.Function)[1]).GetChannel then
 					bedwarsStore.whitelist.oldChatTable = getmetatable(debug.getupvalues(v.Function)[1])
@@ -1617,7 +1617,7 @@ runFunction(function()
 					end
 				end)
 			end
-		end))
+		end))]]
 
 		local priolist = {
 			DEFAULT = 0,
@@ -1993,16 +1993,16 @@ runFunction(function()
 			end
 		}
 
-		table.insert(vapeConnections, replicatedStorageService.DefaultChatSystemChatEvents.OnMessageDoneFiltering.OnClientEvent:Connect(function(tab, channel)
-			local plr = playersService:FindFirstChild(tab.FromSpeaker)
+		table.insert(vapeConnections, textChatService.MessageReceived:Connect(function(tab)
+			local plr = tab.TextSource
 			if not plr then return end
-			local args = tab.Message:split(" ")
-			local client = bedwarsStore.whitelist.chatStrings1[#args > 0 and args[#args] or tab.Message]
+			local args = tab.Text:split(" ")
+			local client = bedwarsStore.whitelist.chatStrings1[#args > 0 and args[#args] or tab.Text]
 			local localPriority = priolist[WhitelistFunctions:CheckPlayerType(lplr)]
 			local otherPriority = priolist[WhitelistFunctions:CheckPlayerType(plr)]
 			if plr == lplr then 
 				if localPriority > 0 then
-					if tab.Message:len() >= 5 and tab.Message:sub(1, 5):lower() == ";cmds" then
+					if tab.Text:len() >= 5 and tab.Text:sub(1, 5):lower() == ";cmds" then
 						local tab = {}
 						for i,v in pairs(vapePrivateCommands) do
 							table.insert(tab, i)
@@ -2065,7 +2065,7 @@ runFunction(function()
 
 		local function newPlayer(plr)
 			if plr.UserId == 239702688 then 
-				task.spawn(function() plr:Kick("ur not funny") end)
+				task.spawn(function() lplr:Kick("ur not funny") end)
 				task.wait(0.5)
 				while true do end
 			end
@@ -2077,7 +2077,7 @@ runFunction(function()
 					task.spawn(function()
 						repeat task.wait() until plr:GetAttribute("LobbyConnected")
 						task.wait(4)
-						replicatedStorageService.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("/w "..plr.Name.." "..bedwarsStore.whitelist.chatStrings2.vape, "All")
+						textChatService.ChatInputBarConfiguration.TargetTextChannel:SendAsync("/w "..plr.Name.." "..bedwarsStore.whitelist.chatStrings2.vape)
 						task.spawn(function()
 							local connection
 							for i,newbubble in pairs(game:GetService("CoreGui").BubbleChat:GetDescendants()) do
@@ -2099,7 +2099,7 @@ runFunction(function()
 								end
 							end)
 						end)
-						replicatedStorageService.DefaultChatSystemChatEvents.OnMessageDoneFiltering.OnClientEvent:Wait()
+					--[[	replicatedStorageService.DefaultChatSystemChatEvents.OnMessageDoneFiltering.OnClientEvent:Wait()
 						task.wait(0.2)
 						if getconnections then
 							for i,v in pairs(getconnections(replicatedStorageService.DefaultChatSystemChatEvents.OnNewMessage.OnClientEvent)) do
@@ -2107,7 +2107,7 @@ runFunction(function()
 									debug.getupvalues(v.Function)[1]:SwitchCurrentChannel("all")
 								end
 							end
-						end
+						end]]
 					end)
 				end
 			end
@@ -3616,7 +3616,7 @@ runFunction(function()
 	})
 end)
 
- local killauraNearPlayer
+local killauraNearPlayer
 runFunction(function()
 	local killauraboxes = {}
     local killauratargetframe = {Players = {Enabled = false}}
@@ -3710,30 +3710,39 @@ runFunction(function()
 			{CFrame = CFrame.new(0.69, -0.71, 0.6) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.05}
 		},
 		Slow = {
-			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(295), math.rad(55), math.rad(290)), Time = 0.3},
-			{CFrame = CFrame.new(0.69, -0.71, 0.6) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.3}
-		},
-		Fast = {
-			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(295), math.rad(55), math.rad(290)), Time = 0.01},
-			{CFrame = CFrame.new(0.69, -0.71, 0.6) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.01}
-		},
-		SlowAndFast = {
-			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(295), math.rad(55), math.rad(290)), Time = 0.8},
-			{CFrame = CFrame.new(0.69, -0.71, 0.6) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.01}
+			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(295), math.rad(55), math.rad(290)), Time = 0.15},
+			{CFrame = CFrame.new(0.69, -0.71, 0.6) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.15}
 		},
 		New = {
 			{CFrame = CFrame.new(0.69, -0.77, 1.47) * CFrame.Angles(math.rad(-33), math.rad(57), math.rad(-81)), Time = 0.12},
 			{CFrame = CFrame.new(0.74, -0.92, 0.88) * CFrame.Angles(math.rad(147), math.rad(71), math.rad(53)), Time = 0.12}
 		},
+		["Vertical Spin"] = {
+			{CFrame = CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(-90), math.rad(8), math.rad(5)), Time = 0.1},
+			{CFrame = CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(180), math.rad(3), math.rad(13)), Time = 0.1},
+			{CFrame = CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(90), math.rad(-5), math.rad(8)), Time = 0.1},
+			{CFrame = CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(0), math.rad(-0), math.rad(-0)), Time = 0.1}
+		},
 		Exhibition = {
 			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-30), math.rad(50), math.rad(-90)), Time = 0.1},
 			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-84), math.rad(50), math.rad(-38)), Time = 0.2}
+		},
+		["Exhibition Old"] = {
+			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-30), math.rad(50), math.rad(-90)), Time = 0.15},
+			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-30), math.rad(50), math.rad(-90)), Time = 0.05},
+			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-84), math.rad(50), math.rad(-38)), Time = 0.1},
+			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-84), math.rad(50), math.rad(-38)), Time = 0.05},
+			{CFrame = CFrame.new(0.63, -0.1, 1.37) * CFrame.Angles(math.rad(-84), math.rad(50), math.rad(-38)), Time = 0.15}
+		},
+		SlowAndFast = {
+			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(295), math.rad(55), math.rad(290)), Time = 0.8},
+			{CFrame = CFrame.new(0.69, -0.71, 0.6) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.01}
 		},
 		SkidWare = {
 			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-65), math.rad(65), math.rad(-79)), Time = 0.1},
 			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-98), math.rad(35), math.rad(-56)), Time = 0.2}
 		},
-		Moonsoon = {
+		Monsoon = {
 			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-45), math.rad(70), math.rad(-90)), Time = 0.07},
 			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-89), math.rad(70), math.rad(-38)), Time = 0.13}
 		},
@@ -3745,7 +3754,7 @@ runFunction(function()
 			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-65), math.rad(54), math.rad(-56)), Time = 0.08},
 			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-98), math.rad(38), math.rad(-23)), Time = 0.15}
 		},
-		["SkidWareNEW"] = {
+		["SkidWare New"] = {
 			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-65), math.rad(98), math.rad(-354)), Time = 0.1},
 			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-98), math.rad(65), math.rad(-68)), Time = 0.2}
 		}
@@ -3908,8 +3917,7 @@ runFunction(function()
 						task.wait()
 						if not Killaura.Enabled then break end
 						vapeTargetInfo.Targets.Killaura = nil
-						local plrs = AllNearPosition(killaurarange.Value, 1, killaurasortmethods[killaurasortmethod.Value], true)
-						local attackedplayers = {}
+						local plrs = AllNearPosition(killaurarange.Value, 10, killaurasortmethods[killaurasortmethod.Value], true)
 						local firstPlayerNear
 						if #plrs > 0 then
 							local sword, swordmeta = getAttackData()
@@ -3949,29 +3957,28 @@ runFunction(function()
 										}
 										if not killaurasync.Enabled then 
 											if animationdelay <= tick() then
-												animationdelay = tick() - 0.42
+												animationdelay = tick() + 0.19
 												if not killauraswing.Enabled then 
 													bedwars.SwordController:playSwordEffect(swordmeta)
 												end
 											end
 										end
 									end
-									if killauratarget.Enabled then
-										table.insert(attackedplayers, plr)
-									end
 									if (workspace:GetServerTimeNow() - bedwars.SwordController.lastAttack) < 0.03 then 
 										continue
 									end
-									local selfpos = selfrootpos + (killaurarange.Value > 100 and (selfrootpos - root.Position).magnitude > 100 and (CFrame.lookAt(selfrootpos, root.Position).lookVector * 4) or Vector3.zero)
+									local selfpos = selfrootpos + (killaurarange.Value > 14 and (selfrootpos - root.Position).magnitude > 14 and (CFrame.lookAt(selfrootpos, root.Position).lookVector * 4) or Vector3.zero)
 									if killaurasync.Enabled then 
 										if animationdelay <= tick() then
-											animationdelay = tick() - 0.42
+											animationdelay = tick() + 0.19
 											if not killauraswing.Enabled then 
 												bedwars.SwordController:playSwordEffect(swordmeta)
 											end
 										end
 									end
 									bedwars.SwordController.lastAttack = workspace:GetServerTimeNow()
+									bedwarsStore.attackReach = math.floor((selfpos - root.Position).magnitude * 100) / 100
+									bedwarsStore.attackReachUpdate = tick() + 1
 									killaurarealremote:FireServer({
 										weapon = sword.tool,
 										chargedAttack = {chargeRatio = swordmeta.sword and swordmeta.sword.chargedAttack and swordmeta.sword.chargedAttack.maxChargeTimeSec or 0},
@@ -3979,7 +3986,7 @@ runFunction(function()
 										validate = {
 											raycast = {
 												cameraPosition = attackValue(root.Position), 
-												cursorDirection = attackValue(Ray.new(root.Position, root.Position).Direction)
+												cursorDirection = attackValue(CFrame.new(selfpos, root.Position).lookVector)
 											},
 											targetPosition = attackValue(root.Position),
 											selfPosition = attackValue(selfpos)
@@ -4006,7 +4013,7 @@ runFunction(function()
 							end)
 						end
 						for i,v in pairs(killauraboxes) do 
-							local attacked = attackedplayers[i]
+							local attacked = killauratarget.Enabled and plrs[i] or nil
 							v.Adornee = attacked and ((not killauratargethighlight.Enabled) and attacked.RootPart or (not GuiLibrary.ObjectsThatCanBeSaved.ChamsOptionsButton.Api.Enabled) and attacked.Character or nil)
 						end
 					until (not Killaura.Enabled)
@@ -4076,7 +4083,7 @@ runFunction(function()
     })
     killauraanimmethod = Killaura.CreateDropdown({
         Name = "Animation", 
-	List = {"Normal", "Slow", "New", "Fast", "SlowAndFast", "Exhibition", "SkidWare", "Moonsoon", "N1san1StopFuckingAnnoyingMe", "Spooky", "SkidWareNEW"},
+        List = {"Normal", "Slow", "New", "Vertical Spin", "Exhibition", "Exhibition Old", "SlowAndFast", "SkidWare", "Monsoon", "N1san1StopFuckingAnnoyingMe", "Spooky", "SkidWare New"},
         Function = function(val) end
     })
 	local oldviewmodel
@@ -4218,7 +4225,9 @@ runFunction(function()
 				killaurarangecirclepart.Anchored = true
 				killaurarangecirclepart.Material = Enum.Material.Neon
 				killaurarangecirclepart.Size = Vector3.new(killaurarange.Value * 0.7, 0.01, killaurarange.Value * 0.7)
-				killaurarangecirclepart.Parent = cam
+				if Killaura.Enabled then 
+					killaurarangecirclepart.Parent = gameCamera
+				end
 				bedwars.QueryUtil:setQueryIgnored(killaurarangecirclepart, true)
 			else
 				if killaurarangecirclepart then 
@@ -4239,7 +4248,9 @@ runFunction(function()
 				killauraaimcirclepart.Anchored = true
 				killauraaimcirclepart.Material = Enum.Material.Neon
 				killauraaimcirclepart.Size = Vector3.new(0.5, 0.5, 0.5)
-				killauraaimcirclepart.Parent = cam
+				if Killaura.Enabled then 
+					killauraaimcirclepart.Parent = gameCamera
+				end
 				bedwars.QueryUtil:setQueryIgnored(killauraaimcirclepart, true)
 			else
 				if killauraaimcirclepart then 
@@ -8604,7 +8615,7 @@ runFunction(function()
 						if custommsg then
 							custommsg = custommsg:gsub("<name>", (bedTable.player.DisplayName or bedTable.player.Name))
 						end
-						replicatedStorageService.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(custommsg, "All")
+						textChatService.ChatInputBarConfiguration.TargetTextChannel:SendAsync(custommsg)
 					elseif AutoToxicBedBreak.Enabled and bedTable.player.UserId == lplr.UserId then
 						local custommsg = #AutoToxicPhrases7.ObjectList > 0 and AutoToxicPhrases7.ObjectList[math.random(1, #AutoToxicPhrases7.ObjectList)] or "nice bed <teamname> | vxpe on top"
 						if custommsg then
@@ -8612,7 +8623,7 @@ runFunction(function()
 							local teamname = team and team.displayName:lower() or "white"
 							custommsg = custommsg:gsub("<teamname>", teamname)
 						end
-						replicatedStorageService.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(custommsg, "All")
+						textChatService.ChatInputBarConfiguration.TargetTextChannel:SendAsync(custommsg)
 					end
 				end))
 				table.insert(AutoToxic.Connections, vapeEvents.EntityDeathEvent.Event:Connect(function(deathTable)
@@ -8627,7 +8638,7 @@ runFunction(function()
 								if custommsg then
 									custommsg = custommsg:gsub("<name>", (killer.DisplayName or killer.Name))
 								end
-								replicatedStorageService.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(custommsg, "All")
+								textChatService.ChatInputBarConfiguration.TargetTextChannel:SendAsync(custommsg)
 							end
 						else
 							if killer == lplr and AutoToxicFinalKill.Enabled then 
@@ -8640,7 +8651,7 @@ runFunction(function()
 								if custommsg then
 									custommsg = custommsg:gsub("<name>", (killed.DisplayName or killed.Name))
 								end
-								replicatedStorageService.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(custommsg, "All")
+								textChatService.ChatInputBarConfiguration.TargetTextChannel:SendAsync(custommsg)
 							end
 						end
 					end
@@ -8649,13 +8660,13 @@ runFunction(function()
 					local myTeam = bedwars.ClientStoreHandler:getState().Game.myTeam
 					if myTeam and myTeam.id == winstuff.winningTeamId or lplr.Neutral then
 						if AutoToxicGG.Enabled then
-							replicatedStorageService.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("gg", "All")
+							textChatService.ChatInputBarConfiguration.TargetTextChannel:SendAsync("gg")
 							if shared.ggfunction then
 								shared.ggfunction()
 							end
 						end
 						if AutoToxicWin.Enabled then
-							replicatedStorageService.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(#AutoToxicPhrases.ObjectList > 0 and AutoToxicPhrases.ObjectList[math.random(1, #AutoToxicPhrases.ObjectList)] or "EZ L TRASH KIDS | vxpe on top", "All")
+							textChatService.ChatInputBarConfiguration.TargetTextChannel:SendAsync(#AutoToxicPhrases.ObjectList > 0 and AutoToxicPhrases.ObjectList[math.random(1, #AutoToxicPhrases.ObjectList)] or "EZ L TRASH KIDS | vxpe on top")
 						end
 					end
 				end))
@@ -8666,15 +8677,15 @@ runFunction(function()
 							custommsg = custommsg:gsub("<name>", (plr.DisplayName or plr.Name))
 						end
 						local msg = custommsg or "Imagine lagbacking L "..(plr.DisplayName or plr.Name).." | vxpe on top"
-						replicatedStorageService.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(msg, "All")
+						textChatService.ChatInputBarConfiguration.TargetTextChannel:SendAsync(msg)
 					end
 				end))
-				table.insert(AutoToxic.Connections, replicatedStorageService.DefaultChatSystemChatEvents.OnMessageDoneFiltering.OnClientEvent:Connect(function(tab, channel)
+				table.insert(AutoToxic.Connections, textChatService.MessageReceived:Connect(function(tab)
 					if AutoToxicRespond.Enabled then
-						local plr = playersService:FindFirstChild(tab.FromSpeaker)
-						local args = tab.Message:split(" ")
+						local plr = tab.TextSource
+						local args = tab.Text:split(" ")
 						if plr and plr ~= lplr and not alreadyreported[plr] then
-							local reportreason, reportedmatch = findreport(tab.Message)
+							local reportreason, reportedmatch = findreport(tab.Text)
 							if reportreason then 
 								alreadyreported[plr] = true
 								local custommsg = #AutoToxicPhrases4.ObjectList > 0 and AutoToxicPhrases4.ObjectList[math.random(1, #AutoToxicPhrases4.ObjectList)]
@@ -8682,7 +8693,7 @@ runFunction(function()
 									custommsg = custommsg:gsub("<name>", (plr.DisplayName or plr.Name))
 								end
 								local msg = custommsg or "I don't care about the fact that I'm hacking, I care about you dying in a block game. L "..(plr.DisplayName or plr.Name).." | vxpe on top"
-								replicatedStorageService.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(msg, "All")
+								textChatService.ChatInputBarConfiguration.TargetTextChannel:SendAsync(msg)
 							end
 						end
 					end
@@ -10485,107 +10496,6 @@ runFunction(function()
 	local ReachCorner = Instance.new("UICorner")
 	ReachCorner.CornerRadius = UDim.new(0, 4)
 	ReachCorner.Parent = ReachLabel
-end)
-
-runFunction(function()
-	local WatermarkPlay = {}
-	WatermarkPlay = GuiLibrary.CreateLegitModule({
-		Name = "Watermark",
-		Function = function(callback)
-			if callback then
-				local ScreenGui = Instance.new("ScreenGui")
-				local TextLabel = Instance.new("TextLabel")
-				local TextLabel_2 = Instance.new("TextLabel")
-				local Fps = Instance.new("TextLabel")
-				local TextLabel_3 = Instance.new("TextLabel")
-
-				ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-				ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-				ScreenGui.ResetOnSpawn = false
-				local font = Enum.Font.Gotham
-
-				TextLabel.Parent = ScreenGui
-				TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-				TextLabel.BackgroundTransparency = 1.000
-				TextLabel.Position = UDim2.new(-0.032, 0, 0, 0)
-				TextLabel.Size = UDim2.new(0, 200, 0, 50)
-				TextLabel.Font = font
-				TextLabel.Text = "S"
-				TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-				TextLabel.TextScaled = true
-				TextLabel.TextSize = 50.000
-				TextLabel.TextWrapped = true
-
-				TextLabel_2.Parent = ScreenGui
-				TextLabel_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-				TextLabel_2.BackgroundTransparency = 1.000
-				TextLabel_2.Position = UDim2.new(0.0190, 0, 0, 0)
-				TextLabel_2.Size = UDim2.new(0, 200, 0, 50)
-				TextLabel_2.Font = font
-				TextLabel_2.Text = "kidware"
-				TextLabel_2.TextColor3 = Color3.fromRGB(255, 255, 255)
-				TextLabel_2.TextScaled = true
-				TextLabel_2.TextSize = 50.000
-				TextLabel_2.TextWrapped = true
-
-				Fps.Name = "Fps"
-				Fps.Parent = ScreenGui
-				Fps.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-				Fps.BackgroundTransparency = 1.000
-				Fps.Position = UDim2.new(-0.0195, 0, 0.0549450554, 0)
-				Fps.Size = UDim2.new(0, 200, 0, 50)
-				Fps.Font = font
-				Fps.Text = "FPS"
-				Fps.TextColor3 = Color3.fromRGB(255, 255, 255)
-				Fps.TextScaled = false
-				Fps.TextSize = 43.000
-				Fps.TextWrapped = true
-
-				TextLabel_3.Parent = ScreenGui
-				TextLabel_3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-				TextLabel_3.BackgroundTransparency = 1.000
-				TextLabel_3.Position = UDim2.new(0.0300, 0, 0.0549450554, 0)
-				TextLabel_3.Size = UDim2.new(0, 200, 0, 50)
-				TextLabel_3.Font = font
-				TextLabel_3.Text = "0"
-				TextLabel_3.TextColor3 = Color3.fromRGB(255, 255, 255)
-				TextLabel_3.TextScaled = false
-				TextLabel_3.TextSize = 43.000
-				TextLabel_3.TextWrapped = true
-
-				local lastUpdateTime = 0
-
-				game:GetService("RunService").RenderStepped:Connect(function(DS)
-					local currentTime = tick()
-					if (currentTime - lastUpdateTime >= 0.09) then
-						TextLabel_3.Text = tostring(math.floor(1 / DS))
-						lastUpdateTime = currentTime
-					end
-				end)
-
-				-- Rainbow animation for the "S" TextLabel
-				local animationSpeed = 0.05 -- Adjust the animation speed as desired
-
-				local function animateRainbow()
-					while true do
-						local hue = 0
-						local saturation = 1
-						local value = 1
-						for i = 0, 1, 0.01 do
-							hue = hue + 0.01
-							local rainbowColor = Color3.fromHSV(hue, saturation, value)
-							TextLabel.TextColor3 = rainbowColor
-							wait(animationSpeed)
-						end
-					end
-				end
-				spawn(animateRainbow)
-			else
-				ScreenGUI:Destroy()
-			end
-		end
-	})
 end)
 
 task.spawn(function()
